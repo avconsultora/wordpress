@@ -1,0 +1,383 @@
+/*
+ * Granalier Productos — no redefine tipografía (hereda de Hello Elementor:
+ * font-family, tamaños y line-height de p / h2 / h3 los pone el theme).
+ * Solo layout, color y componentes propios (tarjetas, chancho, popup).
+ * Ajustá estas variables a los colores exactos de la marca.
+ */
+:root {
+	--gp-primary: #7a1f1f;
+	--gp-primary-dark: #591616;
+	--gp-cream: #f6efe4;
+	--gp-ink: #241a15;
+	--gp-line: rgba(36, 26, 21, 0.12);
+	--gp-radius: 14px;
+}
+
+/* ---------- Filtros ---------- */
+.gp-filtros {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	margin: 0 0 1.75rem;
+}
+
+.gp-filtro {
+	border: 1px solid var(--gp-line);
+	background: transparent;
+	color: var(--gp-ink);
+	padding: 0.5em 1.25em;
+	border-radius: 999px;
+	cursor: pointer;
+	transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.gp-filtro:hover {
+	border-color: var(--gp-primary);
+}
+
+.gp-filtro.is-activo {
+	background: var(--gp-primary);
+	border-color: var(--gp-primary);
+	color: #fff;
+}
+
+/* ---------- Grillas y tarjetas ---------- */
+.gp-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 1.5rem;
+}
+
+.gp-card {
+	appearance: none;
+	text-align: left;
+	background: var(--gp-cream);
+	border: 1px solid var(--gp-line);
+	border-radius: var(--gp-radius);
+	padding: 0;
+	overflow: hidden;
+	cursor: pointer;
+	display: flex;
+	flex-direction: column;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	font: inherit;
+	color: inherit;
+}
+
+.gp-card:hover,
+.gp-card:focus-visible {
+	transform: translateY(-4px);
+	box-shadow: 0 12px 24px rgba(36, 26, 21, 0.12);
+}
+
+.gp-card.gp-oculto {
+	display: none;
+}
+
+.gp-card--sinfondo {
+	background: transparent;
+	border-color: transparent;
+}
+
+.gp-card--sinfondo:hover,
+.gp-card--sinfondo:focus-visible {
+	box-shadow: none;
+	transform: translateY(-2px);
+}
+
+.gp-card__media {
+	display: block;
+	aspect-ratio: 4 / 3;
+	overflow: hidden;
+	background: rgba(36, 26, 21, 0.04);
+}
+
+.gp-card__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.gp-card__body {
+	padding: 1rem 1.1rem 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.gp-card__titulo {
+	font-weight: 700;
+	font-size: 1.05rem;
+}
+
+.gp-card__presentacion {
+	opacity: 0.75;
+	font-size: 0.9rem;
+}
+
+.gp-vacio {
+	opacity: 0.7;
+}
+
+/* ---------- Chancho ---------- */
+.gp-chancho {
+	position: relative;
+	max-width: 900px;
+	margin: 0 auto;
+}
+
+.gp-chancho__lienzo {
+	position: relative;
+	display: block;
+	border-radius: var(--gp-radius);
+	overflow: hidden;
+	background: var(--gp-primary-dark);
+}
+
+.gp-chancho__img {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+.gp-hotspot {
+	position: absolute;
+	width: 28px;
+	height: 28px;
+	margin: -14px 0 0 -14px;
+	padding: 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.gp-hotspot__anillo {
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.15);
+	border: 2px solid #fff;
+	box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+	transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gp-hotspot:hover .gp-hotspot__anillo,
+.gp-hotspot:focus-visible .gp-hotspot__anillo,
+.gp-hotspot.is-activo .gp-hotspot__anillo {
+	background-color: #fff;
+	transform: scale(1.35);
+	box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.25);
+}
+
+.gp-hotspot:focus-visible {
+	outline: none;
+}
+
+.gp-hotspot--vacio .gp-hotspot__anillo {
+	opacity: 0.45;
+}
+
+.gp-hotspot--vacio:hover .gp-hotspot__anillo,
+.gp-hotspot--vacio.is-activo .gp-hotspot__anillo {
+	transform: scale(1.15);
+}
+
+.gp-popover {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 5;
+	transform: translate(-50%, -100%);
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 10px 30px rgba(36, 26, 21, 0.2);
+	padding: 0.75rem;
+	min-width: 190px;
+	pointer-events: auto;
+}
+
+.gp-popover[hidden] {
+	display: none;
+}
+
+.gp-popover__titulo {
+	font-weight: 700;
+	margin-bottom: 0.4rem;
+	color: var(--gp-primary-dark);
+}
+
+.gp-popover__lista {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.gp-popover__lista button {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: 100%;
+	background: transparent;
+	border: none;
+	padding: 0.2rem;
+	border-radius: 6px;
+	cursor: pointer;
+	text-align: left;
+	font: inherit;
+	color: inherit;
+}
+
+.gp-popover__lista button:hover,
+.gp-popover__lista button:focus-visible {
+	background: var(--gp-cream);
+}
+
+.gp-popover__lista img {
+	width: 34px;
+	height: 34px;
+	object-fit: cover;
+	border-radius: 6px;
+}
+
+.gp-popover__vacio {
+	font-size: 0.85rem;
+	opacity: 0.7;
+	margin: 0;
+}
+
+/* ---------- Modal / popup de producto ---------- */
+.gp-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.25rem;
+}
+
+.gp-modal[hidden] {
+	display: none;
+}
+
+.gp-modal__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(20, 14, 11, 0.6);
+}
+
+.gp-modal__dialog {
+	position: relative;
+	background: #fff;
+	border-radius: var(--gp-radius);
+	max-width: 640px;
+	width: 100%;
+	max-height: 90vh;
+	overflow-y: auto;
+	z-index: 1;
+}
+
+.gp-modal__cerrar {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.75rem;
+	background: transparent;
+	border: none;
+	font-size: 2rem;
+	line-height: 1;
+	cursor: pointer;
+	color: var(--gp-ink);
+	z-index: 2;
+}
+
+/* ---------- Detalle de producto (modal, single y embebido) ---------- */
+.gp-detalle {
+	display: flex;
+	flex-direction: column;
+}
+
+.gp-detalle__media img {
+	width: 100%;
+	max-height: 360px;
+	object-fit: cover;
+	display: block;
+	border-radius: var(--gp-radius) var(--gp-radius) 0 0;
+}
+
+.gp-detalle__info {
+	padding: 1.5rem;
+}
+
+.gp-detalle__cat {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 0.75rem;
+	color: var(--gp-primary);
+	opacity: 0.85;
+	margin: 0 0 0.4rem;
+}
+
+.gp-detalle__presentacion {
+	opacity: 0.8;
+}
+
+.gp-detalle__tips {
+	background: var(--gp-cream);
+	border-radius: 10px;
+	padding: 0.75rem 1rem;
+	margin: 1rem 0;
+}
+
+.gp-detalle__tips p {
+	margin: 0.25rem 0 0;
+}
+
+.gp-single__contenedor {
+	max-width: 640px;
+	margin: 2.5rem auto;
+	background: var(--gp-cream);
+	border-radius: var(--gp-radius);
+	overflow: hidden;
+}
+
+/* ---------- CTA WhatsApp ---------- */
+.gp-cta-whatsapp {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.6rem;
+	background: #25d366;
+	color: #fff !important;
+	text-decoration: none !important;
+	padding: 0.85em 1.4em;
+	border-radius: 999px;
+	font-weight: 700;
+	transition: filter 0.2s ease;
+}
+
+.gp-cta-whatsapp:hover,
+.gp-cta-whatsapp:focus-visible {
+	filter: brightness(0.95);
+}
+
+.gp-icon-wa {
+	width: 20px;
+	height: 20px;
+	flex: none;
+}
+
+body.gp-modal-abierto {
+	overflow: hidden;
+}
+
+@media (max-width: 480px) {
+	.gp-popover {
+		min-width: 160px;
+	}
+}

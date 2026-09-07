@@ -1,0 +1,27 @@
+.gp-ubicador__lienzo {
+	position: relative;
+	display: inline-block;
+	max-width: 420px;
+	background: #5c1414;
+	border-radius: 8px;
+	cursor: crosshair;
+	line-height: 0;
+}
+
+.gp-ubicador__lienzo img {
+	max-width: 100%;
+	display: block;
+	border-radius: 8px;
+}
+
+.gp-ubicador__punto {
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	margin: -8px 0 0 -8px;
+	border-radius: 50%;
+	background: #ffd166;
+	border: 2px solid #241a15;
+	box-shadow: 0 0 0 2px #fff;
+	pointer-events: none;
+}
