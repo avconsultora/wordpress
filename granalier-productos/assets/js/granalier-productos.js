@@ -102,8 +102,23 @@
 			function posicionar( hotspot ) {
 				var rectHotspot = hotspot.getBoundingClientRect();
 				var rectBase    = contenedor.getBoundingClientRect();
-				popover.style.left = ( rectHotspot.left - rectBase.left + rectHotspot.width / 2 ) + 'px';
-				popover.style.top  = ( rectHotspot.top - rectBase.top - 6 ) + 'px';
+				var margen      = 8;
+
+				// Se abre hacia abajo si contra el borde de arriba no entra.
+				var haciaAbajo = ( rectHotspot.top - popover.offsetHeight - 20 ) < rectBase.top;
+				popover.classList.toggle( 'gp-popover--abajo', haciaAbajo );
+				popover.style.top = ( rectHotspot.top - rectBase.top + ( haciaAbajo ? rectHotspot.height : 0 ) ) + 'px';
+
+				// Centrado en el punto, pero sin salirse del contenedor:
+				// lo que se corrige de más se le descuenta a la flecha.
+				var mitad  = popover.offsetWidth / 2;
+				var centro = rectHotspot.left - rectBase.left + rectHotspot.width / 2;
+				var minimo = mitad + margen;
+				var maximo = rectBase.width - mitad - margen;
+				var x      = ( maximo < minimo ) ? rectBase.width / 2 : Math.max( minimo, Math.min( maximo, centro ) );
+
+				popover.style.left = x + 'px';
+				popover.style.setProperty( '--gp-flecha', ( centro - x ) + 'px' );
 			}
 
 			function mostrar( hotspot ) {
@@ -114,8 +129,8 @@
 				}
 				popover.innerHTML = '';
 				popover.appendChild( plantilla.content.cloneNode( true ) );
-				posicionar( hotspot );
 				popover.removeAttribute( 'hidden' );
+				posicionar( hotspot );
 				hotspots.forEach( function ( h ) {
 					h.classList.toggle( 'is-activo', h === hotspot );
 				} );

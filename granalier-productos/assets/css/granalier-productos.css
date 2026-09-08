@@ -1,95 +1,104 @@
 /*
- * Granalier Productos — no redefine tipografía (hereda de Hello Elementor:
- * font-family, tamaños y line-height de p / h2 / h3 los pone el theme).
- * Solo layout, color y componentes propios (tarjetas, chancho, popup).
- * Ajustá estas variables a los colores exactos de la marca.
+ * Granalier Productos
+ * Paleta tomada del catálogo oficial y del home: bordó #832931,
+ * bordó oscuro de los bloques, arena de los títulos sobre bordó.
+ * No redefine tipografía global (hereda Hello Elementor); solo pinta
+ * sus propios componentes: tarjetas foto, chancho, popup y CTA.
  */
-:root {
-	--gp-primary: #7a1f1f;
-	--gp-primary-dark: #591616;
-	--gp-cream: #f6efe4;
-	--gp-ink: #241a15;
-	--gp-line: rgba(36, 26, 21, 0.12);
-	--gp-radius: 14px;
+/* Reset acotado a los componentes propios: sin esto, un theme que no
+   aplique border-box hace que el padding desborde la tarjeta. */
+.gp-card,
+.gp-card *,
+.gp-detalle,
+.gp-detalle *,
+.gp-popover,
+.gp-popover *,
+.gp-chancho,
+.gp-chancho * {
+	box-sizing: border-box;
 }
 
-/* ---------- Filtros ---------- */
+:root {
+	--gp-bordo: #832931;
+	--gp-bordo-oscuro: #5c1a21;
+	--gp-arena: #d8b88e;
+	--gp-arena-clara: #ecd9bf;
+	--gp-tinta: #3a2a26;
+	--gp-radio: 16px;
+}
+
+/* ---------- Filtros de categoría ---------- */
 .gp-filtros {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.6rem;
-	margin: 0 0 1.75rem;
+	justify-content: center;
+	gap: 0.5rem;
+	margin: 0 0 2.5rem;
 }
 
 .gp-filtro {
-	border: 1px solid var(--gp-line);
 	background: transparent;
-	color: var(--gp-ink);
-	padding: 0.5em 1.25em;
-	border-radius: 999px;
+	border: 1px solid rgba(131, 41, 49, 0.35);
+	color: var(--gp-bordo);
+	text-transform: uppercase;
+	letter-spacing: 0.09em;
+	font-size: 0.78rem;
+	font-weight: 600;
+	line-height: 1;
+	padding: 0.95em 1.9em;
+	border-radius: 0;
 	cursor: pointer;
-	transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+	transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
 .gp-filtro:hover {
-	border-color: var(--gp-primary);
+	border-color: var(--gp-bordo);
+	background: rgba(131, 41, 49, 0.07);
 }
 
 .gp-filtro.is-activo {
-	background: var(--gp-primary);
-	border-color: var(--gp-primary);
+	background: var(--gp-bordo);
+	border-color: var(--gp-bordo);
 	color: #fff;
 }
 
-/* ---------- Grillas y tarjetas ---------- */
+/* ---------- Grilla de productos ---------- */
 .gp-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-	gap: 1.5rem;
+	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	gap: 1.75rem;
 }
 
+/* La tarjeta es la foto: título en blanco arriba, como en el home. */
 .gp-card {
-	appearance: none;
-	text-align: left;
-	background: var(--gp-cream);
-	border: 1px solid var(--gp-line);
-	border-radius: var(--gp-radius);
+	position: relative;
+	display: block;
+	width: 100%;
+	aspect-ratio: 3 / 4;
 	padding: 0;
+	border: none;
+	background: var(--gp-bordo-oscuro);
+	border-radius: var(--gp-radio);
 	overflow: hidden;
 	cursor: pointer;
-	display: flex;
-	flex-direction: column;
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	box-shadow: 0 14px 30px rgba(58, 42, 38, 0.22);
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
 	font: inherit;
-	color: inherit;
+	color: #fff;
+	text-align: left;
 }
 
 .gp-card:hover,
 .gp-card:focus-visible {
-	transform: translateY(-4px);
-	box-shadow: 0 12px 24px rgba(36, 26, 21, 0.12);
-}
-
-.gp-card.gp-oculto {
-	display: none;
-}
-
-.gp-card--sinfondo {
-	background: transparent;
-	border-color: transparent;
-}
-
-.gp-card--sinfondo:hover,
-.gp-card--sinfondo:focus-visible {
-	box-shadow: none;
-	transform: translateY(-2px);
+	transform: translateY(-6px);
+	box-shadow: 0 22px 40px rgba(58, 42, 38, 0.3);
+	outline: none;
 }
 
 .gp-card__media {
+	position: absolute;
+	inset: 0;
 	display: block;
-	aspect-ratio: 4 / 3;
-	overflow: hidden;
-	background: rgba(36, 26, 21, 0.04);
 }
 
 .gp-card__media img {
@@ -97,42 +106,113 @@
 	height: 100%;
 	object-fit: cover;
 	display: block;
+	transition: transform 0.6s ease;
+}
+
+.gp-card:hover .gp-card__media img,
+.gp-card:focus-visible .gp-card__media img {
+	transform: scale(1.06);
+}
+
+.gp-card::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient( to bottom, rgba(31, 12, 14, 0.68) 0%, rgba(31, 12, 14, 0.28) 30%, rgba(31, 12, 14, 0.06) 50%, rgba(31, 12, 14, 0.75) 100% );
+	z-index: 1;
 }
 
 .gp-card__body {
-	padding: 1rem 1.1rem 1.25rem;
+	position: absolute;
+	inset: 0;
+	z-index: 2;
 	display: flex;
 	flex-direction: column;
-	gap: 0.25rem;
+	padding: 1.2rem 1.3rem 1.4rem;
 }
 
 .gp-card__titulo {
-	font-weight: 700;
-	font-size: 1.05rem;
+	display: block;
+	color: #fff;
+	font-size: 1.4rem;
+	line-height: 1.15;
+	text-shadow: 0 2px 10px rgba(31, 12, 14, 0.45);
 }
 
 .gp-card__presentacion {
-	opacity: 0.75;
-	font-size: 0.9rem;
+	display: block;
+	margin-top: auto;
+	color: rgba(255, 255, 255, 0.92);
+	font-size: 0.85rem;
+	line-height: 1.35;
+	opacity: 0;
+	transform: translateY(8px);
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.gp-card:hover .gp-card__presentacion,
+.gp-card:focus-visible .gp-card__presentacion {
+	opacity: 1;
+	transform: none;
+}
+
+.gp-card.gp-oculto {
+	display: none;
+}
+
+/* Variante para el home: sin sombra, para que flote sobre el fondo. */
+.gp-card--sinfondo {
+	box-shadow: none;
+}
+
+.gp-card--sinfondo:hover,
+.gp-card--sinfondo:focus-visible {
+	box-shadow: 0 16px 30px rgba(58, 42, 38, 0.2);
 }
 
 .gp-vacio {
+	text-align: center;
 	opacity: 0.7;
 }
 
-/* ---------- Chancho ---------- */
+/* En pantallas táctiles no hay hover: la presentación va siempre visible. */
+@media (hover: none) {
+	.gp-card__presentacion {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* En celular, dos productos por fila (como el home) con título más chico. */
+@media (max-width: 600px) {
+	.gp-grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0.9rem;
+	}
+
+	.gp-card__body {
+		padding: 0.85rem 0.9rem 1rem;
+	}
+
+	.gp-card__titulo {
+		font-size: 1.05rem;
+	}
+
+	.gp-card__presentacion {
+		font-size: 0.75rem;
+	}
+}
+
+/* ---------- Diagrama del chancho ---------- */
 .gp-chancho {
 	position: relative;
-	max-width: 900px;
+	max-width: 760px;
 	margin: 0 auto;
 }
 
 .gp-chancho__lienzo {
 	position: relative;
 	display: block;
-	border-radius: var(--gp-radius);
-	overflow: hidden;
-	background: var(--gp-primary-dark);
 }
 
 .gp-chancho__img {
@@ -143,9 +223,9 @@
 
 .gp-hotspot {
 	position: absolute;
-	width: 28px;
-	height: 28px;
-	margin: -14px 0 0 -14px;
+	width: 30px;
+	height: 30px;
+	margin: -15px 0 0 -15px;
 	padding: 0;
 	border: none;
 	background: transparent;
@@ -155,22 +235,36 @@
 	justify-content: center;
 }
 
+/* Mismo punto que usa hoy el diagrama: anillo blanco con centro lleno. */
 .gp-hotspot__anillo {
-	width: 16px;
-	height: 16px;
+	position: relative;
+	width: 17px;
+	height: 17px;
 	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.15);
 	border: 2px solid #fff;
-	box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
-	transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+	transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.gp-hotspot__anillo::after {
+	content: "";
+	position: absolute;
+	inset: 3px;
+	border-radius: 50%;
+	background: #fff;
+	transition: background-color 0.25s ease;
 }
 
 .gp-hotspot:hover .gp-hotspot__anillo,
 .gp-hotspot:focus-visible .gp-hotspot__anillo,
 .gp-hotspot.is-activo .gp-hotspot__anillo {
-	background-color: #fff;
-	transform: scale(1.35);
-	box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.25);
+	transform: scale(1.4);
+	box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.22);
+}
+
+.gp-hotspot:hover .gp-hotspot__anillo::after,
+.gp-hotspot:focus-visible .gp-hotspot__anillo::after,
+.gp-hotspot.is-activo .gp-hotspot__anillo::after {
+	background: var(--gp-arena);
 }
 
 .gp-hotspot:focus-visible {
@@ -178,12 +272,7 @@
 }
 
 .gp-hotspot--vacio .gp-hotspot__anillo {
-	opacity: 0.45;
-}
-
-.gp-hotspot--vacio:hover .gp-hotspot__anillo,
-.gp-hotspot--vacio.is-activo .gp-hotspot__anillo {
-	transform: scale(1.15);
+	opacity: 0.5;
 }
 
 .gp-popover {
@@ -191,13 +280,35 @@
 	top: 0;
 	left: 0;
 	z-index: 5;
-	transform: translate(-50%, -100%);
+	transform: translate(-50%, calc(-100% - 14px));
 	background: #fff;
-	border-radius: 10px;
-	box-shadow: 0 10px 30px rgba(36, 26, 21, 0.2);
-	padding: 0.75rem;
-	min-width: 190px;
-	pointer-events: auto;
+	border-radius: 8px;
+	box-shadow: 0 16px 34px rgba(31, 12, 14, 0.35);
+	padding: 0.85rem 0.9rem;
+	min-width: 200px;
+}
+
+.gp-popover::after {
+	content: "";
+	position: absolute;
+	left: calc(50% + var(--gp-flecha, 0px));
+	bottom: -7px;
+	width: 14px;
+	height: 14px;
+	margin-left: -7px;
+	background: #fff;
+	transform: rotate(45deg);
+	border-radius: 2px;
+}
+
+/* Si el punto está muy arriba, el globo se abre hacia abajo. */
+.gp-popover--abajo {
+	transform: translate(-50%, 14px);
+}
+
+.gp-popover--abajo::after {
+	bottom: auto;
+	top: -7px;
 }
 
 .gp-popover[hidden] {
@@ -205,9 +316,12 @@
 }
 
 .gp-popover__titulo {
+	color: var(--gp-bordo);
+	text-transform: uppercase;
+	letter-spacing: 0.09em;
+	font-size: 0.72rem;
 	font-weight: 700;
-	margin-bottom: 0.4rem;
-	color: var(--gp-primary-dark);
+	margin-bottom: 0.55rem;
 }
 
 .gp-popover__lista {
@@ -216,43 +330,47 @@
 	padding: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 0.35rem;
+	gap: 0.3rem;
 }
 
 .gp-popover__lista button {
 	display: flex;
 	align-items: center;
-	gap: 0.5rem;
+	gap: 0.6rem;
 	width: 100%;
 	background: transparent;
 	border: none;
-	padding: 0.2rem;
+	padding: 0.3rem;
 	border-radius: 6px;
 	cursor: pointer;
 	text-align: left;
 	font: inherit;
-	color: inherit;
+	font-size: 0.92rem;
+	color: var(--gp-tinta);
+	transition: background-color 0.2s ease;
 }
 
 .gp-popover__lista button:hover,
 .gp-popover__lista button:focus-visible {
-	background: var(--gp-cream);
+	background: rgba(131, 41, 49, 0.08);
 }
 
 .gp-popover__lista img {
-	width: 34px;
-	height: 34px;
+	width: 38px;
+	height: 38px;
 	object-fit: cover;
-	border-radius: 6px;
+	border-radius: 4px;
+	flex: none;
 }
 
 .gp-popover__vacio {
 	font-size: 0.85rem;
-	opacity: 0.7;
+	color: var(--gp-tinta);
+	opacity: 0.65;
 	margin: 0;
 }
 
-/* ---------- Modal / popup de producto ---------- */
+/* ---------- Popup de producto ---------- */
 .gp-modal {
 	position: fixed;
 	inset: 0;
@@ -270,114 +388,198 @@
 .gp-modal__overlay {
 	position: absolute;
 	inset: 0;
-	background: rgba(20, 14, 11, 0.6);
+	background: rgba(31, 12, 14, 0.78);
+	backdrop-filter: blur(2px);
 }
 
 .gp-modal__dialog {
 	position: relative;
-	background: #fff;
-	border-radius: var(--gp-radius);
-	max-width: 640px;
+	z-index: 1;
 	width: 100%;
+	max-width: 780px;
 	max-height: 90vh;
 	overflow-y: auto;
-	z-index: 1;
+	background: var(--gp-bordo-oscuro);
+	border-radius: 6px;
+	box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
 }
 
 .gp-modal__cerrar {
 	position: absolute;
-	top: 0.5rem;
-	right: 0.75rem;
+	top: 0.35rem;
+	right: 0.7rem;
 	background: transparent;
 	border: none;
-	font-size: 2rem;
+	font-size: 2.1rem;
 	line-height: 1;
 	cursor: pointer;
-	color: var(--gp-ink);
-	z-index: 2;
+	color: rgba(255, 255, 255, 0.8);
+	z-index: 3;
+	transition: color 0.2s ease;
 }
 
-/* ---------- Detalle de producto (modal, single y embebido) ---------- */
+.gp-modal__cerrar:hover {
+	color: #fff;
+}
+
+/* Aire para que la X no se le encime al texto. */
+.gp-modal .gp-detalle {
+	padding-right: 3rem;
+}
+
+/* ---------- Ficha del producto (popup, single y embebida) ---------- */
+/* Sigue la hoja del catálogo: foto con marco blanco, nombre en itálica,
+   etiqueta "Presentación" finita y el dato en negrita. */
 .gp-detalle {
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	grid-template-columns: 0.85fr 1.15fr;
+	gap: 2rem;
+	align-items: center;
+	padding: 2.3rem 2.4rem;
+	color: #fff;
+}
+
+.gp-detalle__media {
+	background: #fff;
+	padding: 0.6rem;
+	box-shadow: 0 12px 26px rgba(0, 0, 0, 0.3);
 }
 
 .gp-detalle__media img {
-	width: 100%;
-	max-height: 360px;
-	object-fit: cover;
 	display: block;
-	border-radius: var(--gp-radius) var(--gp-radius) 0 0;
-}
-
-.gp-detalle__info {
-	padding: 1.5rem;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
 }
 
 .gp-detalle__cat {
+	color: var(--gp-arena);
 	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	font-size: 0.75rem;
-	color: var(--gp-primary);
-	opacity: 0.85;
-	margin: 0 0 0.4rem;
+	letter-spacing: 0.14em;
+	font-size: 0.7rem;
+	margin: 0 0 0.6rem;
+}
+
+.gp-detalle__titulo {
+	color: #fff;
+	font-style: italic;
+	font-size: 1.7rem;
+	line-height: 1.2;
+	margin: 0 0 1.1rem;
+}
+
+.gp-detalle__etiqueta {
+	display: block;
+	color: rgba(255, 255, 255, 0.75);
+	font-size: 0.82rem;
+	font-weight: 300;
+	margin-bottom: 0.1rem;
 }
 
 .gp-detalle__presentacion {
-	opacity: 0.8;
+	color: #fff;
+	font-weight: 700;
+	font-size: 0.95rem;
+	margin: 0 0 1.25rem;
 }
 
 .gp-detalle__tips {
-	background: var(--gp-cream);
-	border-radius: 10px;
-	padding: 0.75rem 1rem;
-	margin: 1rem 0;
+	border-top: 1px solid rgba(216, 184, 142, 0.35);
+	padding-top: 0.9rem;
+	margin: 0 0 1.4rem;
+}
+
+.gp-detalle__tips .gp-detalle__etiqueta {
+	color: var(--gp-arena);
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	font-size: 0.7rem;
+	margin-bottom: 0.3rem;
 }
 
 .gp-detalle__tips p {
-	margin: 0.25rem 0 0;
+	margin: 0;
+	font-size: 0.92rem;
+	color: rgba(255, 255, 255, 0.9);
 }
 
+@media (max-width: 640px) {
+	.gp-detalle {
+		grid-template-columns: 1fr;
+		padding: 1.5rem;
+		gap: 1.25rem;
+	}
+
+	.gp-detalle__titulo {
+		font-size: 1.4rem;
+	}
+}
+
+/* Single directo: la ficha va sobre el bloque bordó, como en el catálogo. */
 .gp-single__contenedor {
-	max-width: 640px;
-	margin: 2.5rem auto;
-	background: var(--gp-cream);
-	border-radius: var(--gp-radius);
+	max-width: 880px;
+	margin: 3rem auto;
+	background: var(--gp-bordo-oscuro);
+	border-radius: 6px;
 	overflow: hidden;
 }
 
-/* ---------- CTA WhatsApp ---------- */
+.gp-producto-embebido {
+	background: var(--gp-bordo-oscuro);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+/* ---------- CTA WhatsApp (botón del home: rectangular, mayúsculas) ---------- */
 .gp-cta-whatsapp {
 	display: inline-flex;
+	align-self: flex-start;
 	align-items: center;
 	gap: 0.6rem;
-	background: #25d366;
+	background: var(--gp-bordo);
 	color: #fff !important;
 	text-decoration: none !important;
-	padding: 0.85em 1.4em;
-	border-radius: 999px;
-	font-weight: 700;
-	transition: filter 0.2s ease;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	font-size: 0.76rem;
+	font-weight: 600;
+	line-height: 1;
+	padding: 1.05em 1.5em;
+	border-radius: 0;
+	transition: background-color 0.25s ease;
 }
 
 .gp-cta-whatsapp:hover,
 .gp-cta-whatsapp:focus-visible {
-	filter: brightness(0.95);
+	background: #9c333c;
+}
+
+/* Sobre fondo bordó el botón se invierte a arena para que resalte. */
+.gp-detalle .gp-cta-whatsapp {
+	background: var(--gp-arena);
+	color: var(--gp-bordo-oscuro) !important;
+}
+
+.gp-detalle .gp-cta-whatsapp:hover,
+.gp-detalle .gp-cta-whatsapp:focus-visible {
+	background: var(--gp-arena-clara);
 }
 
 .gp-icon-wa {
-	width: 20px;
-	height: 20px;
+	width: 18px;
+	height: 18px;
 	flex: none;
+}
+
+/* En pantallas chicas el CTA se achica lo justo para no partirse en dos. */
+@media (max-width: 480px) {
+	.gp-cta-whatsapp {
+		font-size: 0.72rem;
+		letter-spacing: 0.05em;
+		padding: 1em 1.2em;
+	}
 }
 
 body.gp-modal-abierto {
 	overflow: hidden;
-}
-
-@media (max-width: 480px) {
-	.gp-popover {
-		min-width: 160px;
-	}
 }

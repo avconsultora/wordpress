@@ -94,11 +94,12 @@ function gp_render_detalle( $data, $echo = true ) {
 			<?php endif; ?>
 			<h2 class="gp-detalle__titulo"><?php echo esc_html( $data['titulo'] ); ?></h2>
 			<?php if ( $data['presentacion'] ) : ?>
+				<span class="gp-detalle__etiqueta"><?php esc_html_e( 'Presentación', 'granalier-productos' ); ?></span>
 				<p class="gp-detalle__presentacion"><?php echo esc_html( $data['presentacion'] ); ?></p>
 			<?php endif; ?>
 			<?php if ( $data['tips'] ) : ?>
 				<div class="gp-detalle__tips">
-					<strong><?php esc_html_e( 'Tip de consumo', 'granalier-productos' ); ?>:</strong>
+					<span class="gp-detalle__etiqueta"><?php esc_html_e( 'Tip de consumo', 'granalier-productos' ); ?></span>
 					<p><?php echo esc_html( $data['tips'] ); ?></p>
 				</div>
 			<?php endif; ?>

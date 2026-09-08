@@ -51,7 +51,21 @@ En **Ajustes → Granalier Productos** se configura el número y el mensaje pred
 
 ## Estética
 
-El plugin no pisa la tipografía del theme: hereda `font-family`, tamaños y `line-height` de títulos y párrafos de Hello Elementor. Solo define layout, color y componentes propios (tarjetas, chancho, popup) en `assets/css/granalier-productos.css`, con variables CSS (`--gp-primary`, `--gp-cream`, etc.) al principio del archivo para ajustar a los colores exactos de la marca.
+Sigue el home y el catálogo oficial:
+
+- **Tarjetas**: la foto es la tarjeta (esquinas redondeadas, sombra suave, título en blanco arriba), igual que la grilla de productos del home. La presentación aparece abajo al pasar el mouse; en celular se ve siempre y van 2 por fila.
+- **Filtros y CTA**: botones rectangulares en bordó con texto blanco en mayúscula y espaciado, como el botón CONTACTANOS.
+- **Ficha de producto**: replica la hoja del catálogo — fondo bordó, foto con marco blanco, nombre en itálica, la etiqueta "Presentación" finita y el dato en negrita, y el tip separado por una línea arena.
+
+Paleta tomada del catálogo (variables CSS al principio de `assets/css/granalier-productos.css`):
+
+| Variable | Valor | Uso |
+|---|---|---|
+| `--gp-bordo` | `#832931` | Botones, filtro activo, títulos de sección |
+| `--gp-bordo-oscuro` | `#5c1a21` | Fondo de la ficha y del bloque del chancho |
+| `--gp-arena` | `#d8b88e` | Etiquetas, líneas y CTA sobre bordó |
+
+El plugin no pisa la tipografía del theme: hereda `font-family`, tamaños y `line-height` de Hello Elementor, y solo estiliza sus propios componentes.
 
 ## Fase 2 (pendiente, ya con lugar preparado)
 
