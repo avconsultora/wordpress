@@ -105,8 +105,8 @@ class GP_Parte_Cerdo {
 		if ( ! in_array( $pagenow, array( 'edit-tags.php', 'term.php' ), true ) ) {
 			return;
 		}
-		wp_enqueue_style( 'granalier-productos-admin', GP_PLUGIN_URL . 'assets/css/admin.css', array(), GP_VERSION );
-		wp_enqueue_script( 'granalier-productos-admin', GP_PLUGIN_URL . 'assets/js/admin-parte-cerdo.js', array(), GP_VERSION, true );
+		wp_enqueue_style( 'granalier-productos-admin', GP_PLUGIN_URL . 'assets/css/admin.css', array(), gp_asset_version( 'assets/css/admin.css' ) );
+		wp_enqueue_script( 'granalier-productos-admin', GP_PLUGIN_URL . 'assets/js/admin-parte-cerdo.js', array(), gp_asset_version( 'assets/js/admin-parte-cerdo.js' ), true );
 	}
 
 	private function ubicador_html( $x = '', $y = '' ) {

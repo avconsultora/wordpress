@@ -37,7 +37,7 @@ class GP_Settings {
 			return;
 		}
 		wp_enqueue_media();
-		wp_enqueue_script( 'granalier-productos-admin-settings', GP_PLUGIN_URL . 'assets/js/admin-settings.js', array(), GP_VERSION, true );
+		wp_enqueue_script( 'granalier-productos-admin-settings', GP_PLUGIN_URL . 'assets/js/admin-settings.js', array(), gp_asset_version( 'assets/js/admin-settings.js' ), true );
 	}
 
 	public function menu() {

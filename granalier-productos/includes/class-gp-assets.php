@@ -29,8 +29,7 @@ class GP_Assets {
 		if ( is_admin() ) {
 			return;
 		}
-		wp_enqueue_style( 'granalier-productos', GP_PLUGIN_URL . 'assets/css/granalier-productos.css', array(), GP_VERSION );
-		wp_enqueue_script( 'granalier-productos', GP_PLUGIN_URL . 'assets/js/granalier-productos.js', array(), GP_VERSION, true );
+		self::encolar();
 	}
 
 	public static function encolar() {
@@ -38,7 +37,11 @@ class GP_Assets {
 			return;
 		}
 		self::$usado = true;
-		wp_enqueue_style( 'granalier-productos', GP_PLUGIN_URL . 'assets/css/granalier-productos.css', array(), GP_VERSION );
-		wp_enqueue_script( 'granalier-productos', GP_PLUGIN_URL . 'assets/js/granalier-productos.js', array(), GP_VERSION, true );
+
+		$css = 'assets/css/granalier-productos.css';
+		$js  = 'assets/js/granalier-productos.js';
+
+		wp_enqueue_style( 'granalier-productos', GP_PLUGIN_URL . $css, array(), gp_asset_version( $css ) );
+		wp_enqueue_script( 'granalier-productos', GP_PLUGIN_URL . $js, array(), gp_asset_version( $js ), true );
 	}
 }

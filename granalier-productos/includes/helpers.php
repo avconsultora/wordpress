@@ -4,6 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Versión de un archivo de assets, basada en su fecha de modificación.
+ * Así cada cambio en el CSS o el JS rompe la caché del navegador solo,
+ * sin tener que acordarse de subir el número de versión del plugin.
+ */
+function gp_asset_version( $ruta_relativa ) {
+	$archivo = GP_PLUGIN_DIR . $ruta_relativa;
+	return file_exists( $archivo ) ? GP_VERSION . '.' . filemtime( $archivo ) : GP_VERSION;
+}
+
+/**
  * Devuelve el valor de un campo del producto, usando ACF si está activo
  * y cayendo a post meta simple si no (para no depender de un plugin externo).
  */
