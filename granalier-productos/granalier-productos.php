@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Granalier Productos
  * Description: CPT Productos (fotos, presentacion, tips de consumo), diagrama interactivo del chancho y shortcodes de archivo, destacados, chanchito y ficha de producto en popup, con CTA a WhatsApp.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: AV Consultora
  * Text Domain: granalier-productos
  */
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 define( 'GP_PLUGIN_FILE', __FILE__ );
 define( 'GP_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GP_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-define( 'GP_VERSION', '1.1.0' );
+define( 'GP_VERSION', '1.2.0' );
 
 require_once GP_PLUGIN_DIR . 'includes/helpers.php';
 require_once GP_PLUGIN_DIR . 'includes/class-gp-post-types.php';
