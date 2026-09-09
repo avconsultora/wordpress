@@ -54,7 +54,8 @@ class GP_Shortcodes {
 		if ( empty( $data ) ) {
 			return;
 		}
-		$clases = 'gp-card' . ( $sin_fondo ? ' gp-card--sinfondo' : '' );
+		$clases  = 'gp-card' . ( $sin_fondo ? ' gp-card--sinfondo' : '' );
+		$clases .= $data['imagen'] ? '' : ' gp-card--sin-foto';
 		?>
 		<button type="button"
 			class="<?php echo esc_attr( $clases ); ?>"

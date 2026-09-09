@@ -67,6 +67,8 @@ Paleta tomada del catálogo (variables CSS al principio de `assets/css/granalier
 
 El plugin no pisa la tipografía del theme: hereda `font-family`, tamaños y `line-height` de Hello Elementor, y solo estiliza sus propios componentes.
 
+**Por qué hay `!important` en algunas reglas:** las tarjetas y los filtros son `<button>` y las fotos son `<img>`, y Elementor genera reglas como `.elementor-kit-9 button { ... }` / `.elementor-kit-9 img { height: auto }` que cargan después del plugin y le ganan a una clase suelta. Sin blindaje, las tarjetas heredan los botones del sitio (fondo blanco, borde del color de acento, títulos cortados por `white-space: nowrap`) y las fotos dejan de recortarse. Por eso los selectores van anclados al contenedor (`.gp-grid .gp-card`), el CSS se encola con prioridad tardía y las pocas propiedades que el theme pisa llevan `!important`.
+
 ## Fase 2 (pendiente, ya con lugar preparado)
 
 - **Descripción del producto**: no está en el MVP a propósito. Cuando esté aprobada por la empresa, se puede sumar como un campo ACF más (`descripcion`) y mostrarla en `gp_render_detalle()` (`includes/helpers.php`) sin tocar el resto.

@@ -16,7 +16,10 @@ class GP_Assets {
 	}
 
 	private function __construct() {
-		add_action( 'wp_enqueue_scripts', array( $this, 'registrar' ) );
+		// Prioridad tardía a propósito: así el CSS del plugin se imprime
+		// después del de Elementor y el theme, y gana los empates de
+		// especificidad en vez de perderlos por orden de carga.
+		add_action( 'wp_enqueue_scripts', array( $this, 'registrar' ), 999 );
 	}
 
 	/**

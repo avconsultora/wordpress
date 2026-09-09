@@ -4,7 +4,17 @@
  * bordó oscuro de los bloques, arena de los títulos sobre bordó.
  * No redefine tipografía global (hereda Hello Elementor); solo pinta
  * sus propios componentes: tarjetas foto, chancho, popup y CTA.
+ *
+ * IMPORTANTE sobre la especificidad: Elementor genera reglas como
+ * `.elementor-kit-9 button { ... }` e `.elementor-kit-9 img { ... }`
+ * que cargan DESPUÉS del plugin y le ganan a una clase suelta. Como
+ * las tarjetas y los filtros son <button>, sin blindaje heredan los
+ * botones del sitio (fondo blanco, borde de color, texto sin cortar)
+ * y las fotos dejan de recortarse. Por eso los selectores van
+ * anclados al contenedor y las pocas propiedades que el theme pisa
+ * llevan !important.
  */
+
 /* Reset acotado a los componentes propios: sin esto, un theme que no
    aplique border-box hace que el padding desborde la tarjeta. */
 .gp-card,
@@ -28,7 +38,7 @@
 }
 
 /* ---------- Filtros de categoría ---------- */
-.gp-filtros {
+.gp-archivo .gp-filtros {
 	display: flex;
 	flex-wrap: wrap;
 	justify-content: center;
@@ -36,30 +46,32 @@
 	margin: 0 0 2.5rem;
 }
 
-.gp-filtro {
-	background: transparent;
-	border: 1px solid rgba(131, 41, 49, 0.35);
-	color: var(--gp-bordo);
+.gp-archivo .gp-filtro {
+	background: transparent !important;
+	border: 1px solid rgba(131, 41, 49, 0.35) !important;
+	color: var(--gp-bordo) !important;
 	text-transform: uppercase;
 	letter-spacing: 0.09em;
 	font-size: 0.78rem;
 	font-weight: 600;
 	line-height: 1;
-	padding: 0.95em 1.9em;
-	border-radius: 0;
+	padding: 0.95em 1.9em !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
 	cursor: pointer;
 	transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
-.gp-filtro:hover {
-	border-color: var(--gp-bordo);
-	background: rgba(131, 41, 49, 0.07);
+.gp-archivo .gp-filtro:hover {
+	border-color: var(--gp-bordo) !important;
+	background: rgba(131, 41, 49, 0.07) !important;
+	color: var(--gp-bordo) !important;
 }
 
-.gp-filtro.is-activo {
-	background: var(--gp-bordo);
-	border-color: var(--gp-bordo);
-	color: #fff;
+.gp-archivo .gp-filtro.is-activo {
+	background: var(--gp-bordo) !important;
+	border-color: var(--gp-bordo) !important;
+	color: #fff !important;
 }
 
 /* ---------- Grilla de productos ---------- */
@@ -70,51 +82,61 @@
 }
 
 /* La tarjeta es la foto: título en blanco arriba, como en el home. */
-.gp-card {
+.gp-grid .gp-card {
 	position: relative;
 	display: block;
 	width: 100%;
 	aspect-ratio: 3 / 4;
-	padding: 0;
-	border: none;
-	background: var(--gp-bordo-oscuro);
-	border-radius: var(--gp-radio);
+	margin: 0 !important;
+	padding: 0 !important;
+	border: none !important;
+	background: var(--gp-bordo-oscuro) !important;
+	border-radius: var(--gp-radio) !important;
 	overflow: hidden;
 	cursor: pointer;
 	box-shadow: 0 14px 30px rgba(58, 42, 38, 0.22);
 	transition: transform 0.3s ease, box-shadow 0.3s ease;
 	font: inherit;
-	color: #fff;
+	color: #fff !important;
 	text-align: left;
+	/* El theme puede poner white-space: nowrap en los botones y los
+	   títulos largos se cortarían en una sola línea. */
+	white-space: normal !important;
 }
 
-.gp-card:hover,
-.gp-card:focus-visible {
+.gp-grid .gp-card:hover,
+.gp-grid .gp-card:focus-visible {
 	transform: translateY(-6px);
 	box-shadow: 0 22px 40px rgba(58, 42, 38, 0.3);
+	background: var(--gp-bordo-oscuro) !important;
+	color: #fff !important;
 	outline: none;
 }
 
-.gp-card__media {
+.gp-grid .gp-card__media {
 	position: absolute;
 	inset: 0;
 	display: block;
+	margin: 0;
 }
 
-.gp-card__media img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
+.gp-grid .gp-card__media img {
+	width: 100% !important;
+	height: 100% !important;
+	max-width: none !important;
+	object-fit: cover !important;
 	display: block;
+	margin: 0;
+	border-radius: 0;
 	transition: transform 0.6s ease;
 }
 
-.gp-card:hover .gp-card__media img,
-.gp-card:focus-visible .gp-card__media img {
+.gp-grid .gp-card:hover .gp-card__media img,
+.gp-grid .gp-card:focus-visible .gp-card__media img {
 	transform: scale(1.06);
 }
 
-.gp-card::after {
+.gp-grid .gp-card::after {
 	content: "";
 	position: absolute;
 	inset: 0;
@@ -122,7 +144,7 @@
 	z-index: 1;
 }
 
-.gp-card__body {
+.gp-grid .gp-card__body {
 	position: absolute;
 	inset: 0;
 	z-index: 2;
@@ -131,42 +153,57 @@
 	padding: 1.2rem 1.3rem 1.4rem;
 }
 
-.gp-card__titulo {
+.gp-grid .gp-card__titulo {
 	display: block;
 	color: #fff;
 	font-size: 1.4rem;
 	line-height: 1.15;
+	white-space: normal !important;
 	text-shadow: 0 2px 10px rgba(31, 12, 14, 0.45);
 }
 
-.gp-card__presentacion {
+.gp-grid .gp-card__presentacion {
 	display: block;
 	margin-top: auto;
 	color: rgba(255, 255, 255, 0.92);
 	font-size: 0.85rem;
 	line-height: 1.35;
+	white-space: normal !important;
 	opacity: 0;
 	transform: translateY(8px);
 	transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.gp-card:hover .gp-card__presentacion,
-.gp-card:focus-visible .gp-card__presentacion {
+.gp-grid .gp-card:hover .gp-card__presentacion,
+.gp-grid .gp-card:focus-visible .gp-card__presentacion {
 	opacity: 1;
 	transform: none;
 }
 
-.gp-card.gp-oculto {
+.gp-grid .gp-card.gp-oculto {
 	display: none;
 }
 
+/* Producto sin foto cargada: el título va centrado sobre el bordó,
+   para que la tarjeta no se vea vacía. */
+.gp-grid .gp-card--sin-foto .gp-card__body {
+	justify-content: center;
+	text-align: center;
+}
+
+.gp-grid .gp-card--sin-foto .gp-card__presentacion {
+	margin-top: 0.5rem;
+	opacity: 1;
+	transform: none;
+}
+
 /* Variante para el home: sin sombra, para que flote sobre el fondo. */
-.gp-card--sinfondo {
+.gp-grid .gp-card--sinfondo {
 	box-shadow: none;
 }
 
-.gp-card--sinfondo:hover,
-.gp-card--sinfondo:focus-visible {
+.gp-grid .gp-card--sinfondo:hover,
+.gp-grid .gp-card--sinfondo:focus-visible {
 	box-shadow: 0 16px 30px rgba(58, 42, 38, 0.2);
 }
 
@@ -177,7 +214,7 @@
 
 /* En pantallas táctiles no hay hover: la presentación va siempre visible. */
 @media (hover: none) {
-	.gp-card__presentacion {
+	.gp-grid .gp-card__presentacion {
 		opacity: 1;
 		transform: none;
 	}
@@ -190,15 +227,15 @@
 		gap: 0.9rem;
 	}
 
-	.gp-card__body {
+	.gp-grid .gp-card__body {
 		padding: 0.85rem 0.9rem 1rem;
 	}
 
-	.gp-card__titulo {
+	.gp-grid .gp-card__titulo {
 		font-size: 1.05rem;
 	}
 
-	.gp-card__presentacion {
+	.gp-grid .gp-card__presentacion {
 		font-size: 0.75rem;
 	}
 }
@@ -210,25 +247,31 @@
 	margin: 0 auto;
 }
 
-.gp-chancho__lienzo {
+.gp-chancho .gp-chancho__lienzo {
 	position: relative;
 	display: block;
 }
 
-.gp-chancho__img {
-	width: 100%;
-	height: auto;
+.gp-chancho .gp-chancho__img {
+	width: 100% !important;
+	height: auto !important;
+	max-width: 100% !important;
 	display: block;
+	margin: 0;
 }
 
-.gp-hotspot {
+.gp-chancho .gp-hotspot {
 	position: absolute;
-	width: 30px;
-	height: 30px;
-	margin: -15px 0 0 -15px;
-	padding: 0;
-	border: none;
-	background: transparent;
+	width: 30px !important;
+	height: 30px !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	margin: -15px 0 0 -15px !important;
+	padding: 0 !important;
+	border: none !important;
+	border-radius: 50% !important;
+	background: transparent !important;
+	box-shadow: none !important;
 	cursor: pointer;
 	display: flex;
 	align-items: center;
@@ -236,7 +279,7 @@
 }
 
 /* Mismo punto que usa hoy el diagrama: anillo blanco con centro lleno. */
-.gp-hotspot__anillo {
+.gp-chancho .gp-hotspot__anillo {
 	position: relative;
 	width: 17px;
 	height: 17px;
@@ -245,7 +288,7 @@
 	transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.gp-hotspot__anillo::after {
+.gp-chancho .gp-hotspot__anillo::after {
 	content: "";
 	position: absolute;
 	inset: 3px;
@@ -254,28 +297,28 @@
 	transition: background-color 0.25s ease;
 }
 
-.gp-hotspot:hover .gp-hotspot__anillo,
-.gp-hotspot:focus-visible .gp-hotspot__anillo,
-.gp-hotspot.is-activo .gp-hotspot__anillo {
+.gp-chancho .gp-hotspot:hover .gp-hotspot__anillo,
+.gp-chancho .gp-hotspot:focus-visible .gp-hotspot__anillo,
+.gp-chancho .gp-hotspot.is-activo .gp-hotspot__anillo {
 	transform: scale(1.4);
 	box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.22);
 }
 
-.gp-hotspot:hover .gp-hotspot__anillo::after,
-.gp-hotspot:focus-visible .gp-hotspot__anillo::after,
-.gp-hotspot.is-activo .gp-hotspot__anillo::after {
+.gp-chancho .gp-hotspot:hover .gp-hotspot__anillo::after,
+.gp-chancho .gp-hotspot:focus-visible .gp-hotspot__anillo::after,
+.gp-chancho .gp-hotspot.is-activo .gp-hotspot__anillo::after {
 	background: var(--gp-arena);
 }
 
-.gp-hotspot:focus-visible {
+.gp-chancho .gp-hotspot:focus-visible {
 	outline: none;
 }
 
-.gp-hotspot--vacio .gp-hotspot__anillo {
+.gp-chancho .gp-hotspot--vacio .gp-hotspot__anillo {
 	opacity: 0.5;
 }
 
-.gp-popover {
+.gp-chancho .gp-popover {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -286,9 +329,10 @@
 	box-shadow: 0 16px 34px rgba(31, 12, 14, 0.35);
 	padding: 0.85rem 0.9rem;
 	min-width: 200px;
+	white-space: normal;
 }
 
-.gp-popover::after {
+.gp-chancho .gp-popover::after {
 	content: "";
 	position: absolute;
 	left: calc(50% + var(--gp-flecha, 0px));
@@ -302,20 +346,20 @@
 }
 
 /* Si el punto está muy arriba, el globo se abre hacia abajo. */
-.gp-popover--abajo {
+.gp-chancho .gp-popover--abajo {
 	transform: translate(-50%, 14px);
 }
 
-.gp-popover--abajo::after {
+.gp-chancho .gp-popover--abajo::after {
 	bottom: auto;
 	top: -7px;
 }
 
-.gp-popover[hidden] {
+.gp-chancho .gp-popover[hidden] {
 	display: none;
 }
 
-.gp-popover__titulo {
+.gp-chancho .gp-popover__titulo {
 	color: var(--gp-bordo);
 	text-transform: uppercase;
 	letter-spacing: 0.09em;
@@ -324,7 +368,7 @@
 	margin-bottom: 0.55rem;
 }
 
-.gp-popover__lista {
+.gp-chancho .gp-popover__lista {
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -333,37 +377,43 @@
 	gap: 0.3rem;
 }
 
-.gp-popover__lista button {
+.gp-chancho .gp-popover__lista button {
 	display: flex;
 	align-items: center;
 	gap: 0.6rem;
 	width: 100%;
-	background: transparent;
-	border: none;
-	padding: 0.3rem;
-	border-radius: 6px;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	padding: 0.3rem !important;
+	margin: 0 !important;
+	border-radius: 6px !important;
 	cursor: pointer;
 	text-align: left;
 	font: inherit;
 	font-size: 0.92rem;
-	color: var(--gp-tinta);
+	color: var(--gp-tinta) !important;
+	white-space: normal !important;
 	transition: background-color 0.2s ease;
 }
 
-.gp-popover__lista button:hover,
-.gp-popover__lista button:focus-visible {
-	background: rgba(131, 41, 49, 0.08);
+.gp-chancho .gp-popover__lista button:hover,
+.gp-chancho .gp-popover__lista button:focus-visible {
+	background: rgba(131, 41, 49, 0.08) !important;
+	color: var(--gp-tinta) !important;
 }
 
-.gp-popover__lista img {
-	width: 38px;
-	height: 38px;
-	object-fit: cover;
+.gp-chancho .gp-popover__lista img {
+	width: 38px !important;
+	height: 38px !important;
+	max-width: none !important;
+	object-fit: cover !important;
 	border-radius: 4px;
+	margin: 0;
 	flex: none;
 }
 
-.gp-popover__vacio {
+.gp-chancho .gp-popover__vacio {
 	font-size: 0.85rem;
 	color: var(--gp-tinta);
 	opacity: 0.65;
@@ -385,14 +435,14 @@
 	display: none;
 }
 
-.gp-modal__overlay {
+.gp-modal .gp-modal__overlay {
 	position: absolute;
 	inset: 0;
 	background: rgba(31, 12, 14, 0.78);
 	backdrop-filter: blur(2px);
 }
 
-.gp-modal__dialog {
+.gp-modal .gp-modal__dialog {
 	position: relative;
 	z-index: 1;
 	width: 100%;
@@ -404,22 +454,26 @@
 	box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
 }
 
-.gp-modal__cerrar {
+.gp-modal .gp-modal__cerrar {
 	position: absolute;
 	top: 0.35rem;
 	right: 0.7rem;
-	background: transparent;
-	border: none;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	padding: 0.2rem 0.4rem !important;
+	margin: 0 !important;
 	font-size: 2.1rem;
 	line-height: 1;
 	cursor: pointer;
-	color: rgba(255, 255, 255, 0.8);
+	color: rgba(255, 255, 255, 0.8) !important;
 	z-index: 3;
 	transition: color 0.2s ease;
 }
 
-.gp-modal__cerrar:hover {
-	color: #fff;
+.gp-modal .gp-modal__cerrar:hover {
+	color: #fff !important;
+	background: transparent !important;
 }
 
 /* Aire para que la X no se le encime al texto. */
@@ -439,20 +493,24 @@
 	color: #fff;
 }
 
-.gp-detalle__media {
+.gp-detalle .gp-detalle__media {
 	background: #fff;
 	padding: 0.6rem;
 	box-shadow: 0 12px 26px rgba(0, 0, 0, 0.3);
 }
 
-.gp-detalle__media img {
+.gp-detalle .gp-detalle__media img {
 	display: block;
-	width: 100%;
+	width: 100% !important;
+	height: auto !important;
+	max-width: 100% !important;
 	aspect-ratio: 4 / 3;
-	object-fit: cover;
+	object-fit: cover !important;
+	margin: 0;
+	border-radius: 0;
 }
 
-.gp-detalle__cat {
+.gp-detalle .gp-detalle__cat {
 	color: var(--gp-arena);
 	text-transform: uppercase;
 	letter-spacing: 0.14em;
@@ -460,7 +518,7 @@
 	margin: 0 0 0.6rem;
 }
 
-.gp-detalle__titulo {
+.gp-detalle .gp-detalle__titulo {
 	color: #fff;
 	font-style: italic;
 	font-size: 1.7rem;
@@ -468,7 +526,7 @@
 	margin: 0 0 1.1rem;
 }
 
-.gp-detalle__etiqueta {
+.gp-detalle .gp-detalle__etiqueta {
 	display: block;
 	color: rgba(255, 255, 255, 0.75);
 	font-size: 0.82rem;
@@ -476,20 +534,20 @@
 	margin-bottom: 0.1rem;
 }
 
-.gp-detalle__presentacion {
+.gp-detalle .gp-detalle__presentacion {
 	color: #fff;
 	font-weight: 700;
 	font-size: 0.95rem;
 	margin: 0 0 1.25rem;
 }
 
-.gp-detalle__tips {
+.gp-detalle .gp-detalle__tips {
 	border-top: 1px solid rgba(216, 184, 142, 0.35);
 	padding-top: 0.9rem;
 	margin: 0 0 1.4rem;
 }
 
-.gp-detalle__tips .gp-detalle__etiqueta {
+.gp-detalle .gp-detalle__tips .gp-detalle__etiqueta {
 	color: var(--gp-arena);
 	text-transform: uppercase;
 	letter-spacing: 0.1em;
@@ -497,7 +555,7 @@
 	margin-bottom: 0.3rem;
 }
 
-.gp-detalle__tips p {
+.gp-detalle .gp-detalle__tips p {
 	margin: 0;
 	font-size: 0.92rem;
 	color: rgba(255, 255, 255, 0.9);
@@ -510,7 +568,7 @@
 		gap: 1.25rem;
 	}
 
-	.gp-detalle__titulo {
+	.gp-detalle .gp-detalle__titulo {
 		font-size: 1.4rem;
 	}
 }
@@ -531,55 +589,46 @@
 }
 
 /* ---------- CTA WhatsApp (botón del home: rectangular, mayúsculas) ---------- */
-.gp-cta-whatsapp {
+.gp-detalle .gp-cta-whatsapp {
 	display: inline-flex;
 	align-self: flex-start;
 	align-items: center;
 	gap: 0.6rem;
-	background: var(--gp-bordo);
-	color: #fff !important;
+	background: var(--gp-arena) !important;
+	color: var(--gp-bordo-oscuro) !important;
+	border: none !important;
 	text-decoration: none !important;
 	text-transform: uppercase;
 	letter-spacing: 0.07em;
 	font-size: 0.76rem;
 	font-weight: 600;
 	line-height: 1;
-	padding: 1.05em 1.5em;
-	border-radius: 0;
+	padding: 1.05em 1.5em !important;
+	border-radius: 0 !important;
 	transition: background-color 0.25s ease;
-}
-
-.gp-cta-whatsapp:hover,
-.gp-cta-whatsapp:focus-visible {
-	background: #9c333c;
-}
-
-/* Sobre fondo bordó el botón se invierte a arena para que resalte. */
-.gp-detalle .gp-cta-whatsapp {
-	background: var(--gp-arena);
-	color: var(--gp-bordo-oscuro) !important;
 }
 
 .gp-detalle .gp-cta-whatsapp:hover,
 .gp-detalle .gp-cta-whatsapp:focus-visible {
-	background: var(--gp-arena-clara);
+	background: var(--gp-arena-clara) !important;
+	color: var(--gp-bordo-oscuro) !important;
 }
 
-.gp-icon-wa {
-	width: 18px;
-	height: 18px;
+.gp-detalle .gp-icon-wa {
+	width: 18px !important;
+	height: 18px !important;
 	flex: none;
-}
-
-/* En pantallas chicas el CTA se achica lo justo para no partirse en dos. */
-@media (max-width: 480px) {
-	.gp-cta-whatsapp {
-		font-size: 0.72rem;
-		letter-spacing: 0.05em;
-		padding: 1em 1.2em;
-	}
 }
 
 body.gp-modal-abierto {
 	overflow: hidden;
+}
+
+/* En pantallas chicas el CTA se achica lo justo para no partirse en dos. */
+@media (max-width: 480px) {
+	.gp-detalle .gp-cta-whatsapp {
+		font-size: 0.72rem;
+		letter-spacing: 0.05em;
+		padding: 1em 1.2em !important;
+	}
 }
