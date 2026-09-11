@@ -37,6 +37,285 @@
 	--gp-radio: 16px;
 }
 
+/* ---------- Archivo con el chancho al costado ---------- */
+/* Sticky y no fixed: acompaña el scroll de la grilla pero se queda
+   dentro de la sección, sin taparle el header ni montarse al footer.
+   --gp-chancho-top se ajusta si el sitio tiene header fijo. */
+.gp-archivo--con-chancho {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 320px;
+	gap: 2.5rem;
+	align-items: start;
+}
+
+.gp-archivo__chancho {
+	position: sticky;
+	top: var(--gp-chancho-top, 100px);
+}
+
+.gp-archivo .gp-panel {
+	background: var(--gp-bordo-oscuro);
+	border-radius: var(--gp-radio);
+	padding: 1.1rem 1.2rem 1.3rem;
+}
+
+.gp-archivo .gp-panel__cabecera {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.75rem;
+}
+
+.gp-archivo .gp-panel__titulo {
+	color: var(--gp-arena);
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	font-size: 0.72rem;
+	font-weight: 700;
+}
+
+.gp-archivo .gp-panel__cerrar {
+	display: none;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	font-size: 1.8rem;
+	line-height: 1;
+	color: rgba(255, 255, 255, 0.8) !important;
+	cursor: pointer;
+}
+
+.gp-archivo .gp-panel__ayuda {
+	margin: 0.85rem 0 0;
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.78rem;
+	line-height: 1.35;
+}
+
+/* Etiqueta con el nombre del corte al pasar por un punto. */
+.gp-chancho .gp-etiqueta {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 5;
+	transform: translate(-50%, calc(-100% - 12px));
+	background: #fff;
+	color: var(--gp-bordo);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 0.68rem;
+	font-weight: 700;
+	padding: 0.35rem 0.6rem;
+	border-radius: 4px;
+	white-space: nowrap;
+	pointer-events: none;
+	box-shadow: 0 8px 18px rgba(31, 12, 14, 0.3);
+}
+
+.gp-chancho .gp-etiqueta[hidden] {
+	display: none;
+}
+
+/* El punto encendido pulsa, así se encuentra rápido en el diagrama. */
+.gp-chancho .gp-hotspot.is-activo .gp-hotspot__anillo {
+	animation: gp-pulso 1.5s ease-out infinite;
+}
+
+@keyframes gp-pulso {
+	0% {
+		box-shadow: 0 0 0 0 rgba(216, 184, 142, 0.6);
+	}
+	70% {
+		box-shadow: 0 0 0 12px rgba(216, 184, 142, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(216, 184, 142, 0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gp-chancho .gp-hotspot.is-activo .gp-hotspot__anillo {
+		animation: none;
+	}
+}
+
+/* Resaltado cruzado grilla <-> chancho. */
+.gp-grid .gp-card.gp-atenuado {
+	opacity: 0.3;
+}
+
+.gp-grid .gp-card.gp-resaltado {
+	box-shadow: 0 0 0 3px var(--gp-arena), 0 18px 34px rgba(58, 42, 38, 0.28);
+}
+
+/* Chip del corte activo. */
+.gp-archivo .gp-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--gp-bordo);
+	color: #fff;
+	border-radius: 999px;
+	padding: 0.45rem 0.5rem 0.45rem 1rem;
+	font-size: 0.8rem;
+	margin: 0 0 1.5rem;
+}
+
+.gp-archivo .gp-chip[hidden] {
+	display: none;
+}
+
+.gp-archivo .gp-chip button {
+	background: rgba(255, 255, 255, 0.2) !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #fff !important;
+	width: 22px;
+	height: 22px;
+	min-width: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border-radius: 50% !important;
+	font-size: 1rem;
+	line-height: 1;
+	cursor: pointer;
+}
+
+/* Botón flotante: solo en mobile. */
+.gp-archivo .gp-chancho-fab {
+	display: none;
+	position: fixed;
+	right: 1rem;
+	bottom: 1rem;
+	z-index: 30;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--gp-bordo) !important;
+	color: #fff !important;
+	border: none !important;
+	border-radius: 999px !important;
+	padding: 0.85rem 1.2rem !important;
+	margin: 0 !important;
+	font-size: 0.78rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	box-shadow: 0 10px 24px rgba(31, 12, 14, 0.35) !important;
+	cursor: pointer;
+}
+
+.gp-archivo .gp-icon-chancho {
+	width: 22px !important;
+	height: 22px !important;
+	flex: none;
+}
+
+/* Lista de cortes por nombre: reemplaza a los puntos en mobile. */
+.gp-chancho__lista {
+	display: none;
+	list-style: none;
+	margin: 1rem 0 0;
+	padding: 0;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.gp-chancho .gp-parte-chip {
+	background: rgba(255, 255, 255, 0.12) !important;
+	border: 1px solid rgba(216, 184, 142, 0.4) !important;
+	box-shadow: none !important;
+	color: #fff !important;
+	border-radius: 999px !important;
+	padding: 0.55rem 0.9rem !important;
+	margin: 0 !important;
+	font-size: 0.8rem;
+	line-height: 1;
+	white-space: nowrap !important;
+	cursor: pointer;
+}
+
+.gp-chancho .gp-parte-chip[disabled] {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.gp-chancho .gp-parte-chip.is-activo {
+	background: var(--gp-arena) !important;
+	border-color: var(--gp-arena) !important;
+	color: var(--gp-bordo-oscuro) !important;
+}
+
+/* Mobile: el chancho pasa a un panel inferior que abre el botón flotante. */
+@media (max-width: 900px) {
+	.gp-archivo--con-chancho {
+		grid-template-columns: 1fr;
+		gap: 0;
+	}
+
+	.gp-archivo__chancho {
+		position: fixed;
+		top: auto;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 40;
+		padding: 0 0.6rem 0.6rem;
+		transform: translateY(105%);
+		transition: transform 0.3s ease;
+		pointer-events: none;
+	}
+
+	.gp-archivo__chancho.is-abierto {
+		transform: none;
+		pointer-events: auto;
+	}
+
+	.gp-archivo__chancho.is-abierto::before {
+		content: "";
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		background: rgba(31, 12, 14, 0.65);
+	}
+
+	.gp-archivo .gp-panel {
+		max-height: 80vh;
+		overflow-y: auto;
+		box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.45);
+	}
+
+	.gp-archivo .gp-panel__cerrar {
+		display: block;
+	}
+
+	.gp-archivo .gp-chancho-fab.is-visible {
+		display: inline-flex;
+	}
+
+	/* Aire abajo para que el botón flotante no tape la última fila. */
+	.gp-archivo--con-chancho {
+		padding-bottom: 4.5rem;
+	}
+
+	.gp-chancho__lista {
+		display: flex;
+	}
+
+	/* Puntos un poco más grandes para el dedo. */
+	.gp-chancho--filtro .gp-hotspot {
+		width: 34px !important;
+		height: 34px !important;
+		margin: -17px 0 0 -17px !important;
+	}
+
+	.gp-archivo .gp-panel__ayuda {
+		display: none;
+	}
+}
+
 /* ---------- Filtros de categoría ---------- */
 .gp-archivo .gp-filtros {
 	display: flex;

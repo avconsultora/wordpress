@@ -61,6 +61,7 @@ class GP_Shortcodes {
 			class="<?php echo esc_attr( $clases ); ?>"
 			data-gp-open="<?php echo esc_attr( $data['id'] ); ?>"
 			data-cats="<?php echo esc_attr( implode( ' ', $data['cat_slugs'] ) ); ?>"
+			data-partes="<?php echo esc_attr( implode( ' ', $data['partes'] ) ); ?>"
 			aria-haspopup="dialog">
 			<?php if ( $data['imagen'] ) : ?>
 				<span class="gp-card__media">
@@ -101,6 +102,17 @@ class GP_Shortcodes {
 	public function shortcode_archivo( $atts ) {
 		$this->encolar_assets();
 
+		$atts = shortcode_atts(
+			array(
+				'chancho' => 'si',
+			),
+			$atts,
+			'granalier_productos_archivo'
+		);
+
+		$partes      = GP_Parte_Cerdo::obtener_partes();
+		$con_chancho = ( 'no' !== $atts['chancho'] ) && ! empty( $partes );
+
 		$posts = get_posts(
 			array(
 				'post_type'      => 'producto',
@@ -119,27 +131,56 @@ class GP_Shortcodes {
 
 		ob_start();
 		?>
-		<div class="gp-archivo">
-			<?php if ( ! is_wp_error( $categorias ) && $categorias ) : ?>
-				<div class="gp-filtros" role="tablist" aria-label="<?php esc_attr_e( 'Filtrar por categoría', 'granalier-productos' ); ?>">
-					<button type="button" class="gp-filtro is-activo" data-gp-filtro="todos"><?php esc_html_e( 'Todos', 'granalier-productos' ); ?></button>
-					<?php foreach ( $categorias as $cat ) : ?>
-						<button type="button" class="gp-filtro" data-gp-filtro="<?php echo esc_attr( $cat->slug ); ?>"><?php echo esc_html( $cat->name ); ?></button>
-					<?php endforeach; ?>
-				</div>
-			<?php endif; ?>
+		<div class="gp-archivo<?php echo $con_chancho ? ' gp-archivo--con-chancho' : ''; ?>" data-gp-archivo>
+			<div class="gp-archivo__productos">
+				<?php if ( ! is_wp_error( $categorias ) && $categorias ) : ?>
+					<div class="gp-filtros" role="tablist" aria-label="<?php esc_attr_e( 'Filtrar por categoría', 'granalier-productos' ); ?>">
+						<button type="button" class="gp-filtro is-activo" data-gp-filtro="todos"><?php esc_html_e( 'Todos', 'granalier-productos' ); ?></button>
+						<?php foreach ( $categorias as $cat ) : ?>
+							<button type="button" class="gp-filtro" data-gp-filtro="<?php echo esc_attr( $cat->slug ); ?>"><?php echo esc_html( $cat->name ); ?></button>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 
-			<div class="gp-grid" data-gp-grid>
-				<?php
-				if ( $posts ) {
-					foreach ( $posts as $post ) {
-						$this->render_card( gp_get_producto_data( $post->ID ) );
+				<?php if ( $con_chancho ) : ?>
+					<div class="gp-chip" data-gp-chip hidden>
+						<span><?php esc_html_e( 'Corte', 'granalier-productos' ); ?>: <strong data-gp-chip-nombre></strong></span>
+						<button type="button" data-gp-chip-limpiar aria-label="<?php esc_attr_e( 'Quitar filtro de corte', 'granalier-productos' ); ?>">&times;</button>
+					</div>
+				<?php endif; ?>
+
+				<div class="gp-grid" data-gp-grid>
+					<?php
+					if ( $posts ) {
+						foreach ( $posts as $post ) {
+							$this->render_card( gp_get_producto_data( $post->ID ) );
+						}
+					} else {
+						echo '<p class="gp-vacio">' . esc_html__( 'Todavía no hay productos cargados.', 'granalier-productos' ) . '</p>';
 					}
-				} else {
-					echo '<p class="gp-vacio">' . esc_html__( 'Todavía no hay productos cargados.', 'granalier-productos' ) . '</p>';
-				}
-				?>
+					?>
+				</div>
+
+				<p class="gp-vacio" data-gp-sin-resultados hidden><?php esc_html_e( 'No hay productos con esa combinación de filtros.', 'granalier-productos' ); ?></p>
 			</div>
+
+			<?php if ( $con_chancho ) : ?>
+				<aside class="gp-archivo__chancho" data-gp-panel-chancho>
+					<div class="gp-panel">
+						<div class="gp-panel__cabecera">
+							<span class="gp-panel__titulo"><?php esc_html_e( '¿De qué parte sale?', 'granalier-productos' ); ?></span>
+							<button type="button" class="gp-panel__cerrar" data-gp-panel-cerrar aria-label="<?php esc_attr_e( 'Cerrar', 'granalier-productos' ); ?>">&times;</button>
+						</div>
+						<?php $this->render_chancho( 'filtro' ); ?>
+						<p class="gp-panel__ayuda"><?php esc_html_e( 'Tocá un punto para ver los productos de ese corte.', 'granalier-productos' ); ?></p>
+					</div>
+				</aside>
+
+				<button type="button" class="gp-chancho-fab" data-gp-panel-abrir aria-expanded="false">
+					<?php echo gp_chancho_icon(); ?>
+					<span><?php esc_html_e( 'Ver por corte', 'granalier-productos' ); ?></span>
+				</button>
+			<?php endif; ?>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -207,6 +248,19 @@ class GP_Shortcodes {
 	public function shortcode_chancho( $atts ) {
 		$this->encolar_assets();
 
+		ob_start();
+		$this->render_chancho( 'popup' );
+		return ob_get_clean();
+	}
+
+	/**
+	 * El diagrama, en dos modos:
+	 * - popup: el del home. Al pasar el mouse lista los productos de esa
+	 *   parte y al hacer clic abre la ficha.
+	 * - filtro: el de la columna del archivo. Al pasar el mouse resalta
+	 *   los productos de esa parte en la grilla y al hacer clic filtra.
+	 */
+	private function render_chancho( $modo = 'popup' ) {
 		$partes = GP_Parte_Cerdo::obtener_partes();
 
 		foreach ( $partes as $indice => $parte ) {
@@ -226,56 +280,79 @@ class GP_Shortcodes {
 			$partes[ $indice ]['productos'] = $productos;
 		}
 
-		ob_start();
+		$es_popup = ( 'popup' === $modo );
 		?>
-		<div class="gp-chancho" data-gp-chancho>
+		<div class="gp-chancho gp-chancho--<?php echo esc_attr( $modo ); ?>" data-gp-chancho data-gp-modo="<?php echo esc_attr( $modo ); ?>">
 			<div class="gp-chancho__lienzo">
 				<img class="gp-chancho__img" src="<?php echo esc_url( GP_Settings::imagen_chancho() ); ?>" alt="<?php esc_attr_e( 'Diagrama de cortes de cerdo Granalier', 'granalier-productos' ); ?>" />
 
 				<?php foreach ( $partes as $parte ) : ?>
 					<?php
-					$vacio = empty( $parte['productos'] );
-					$solo_id = ( 1 === count( $parte['productos'] ) ) ? $parte['productos'][0]->ID : '';
+					$vacio   = empty( $parte['productos'] );
+					$solo_id = ( $es_popup && 1 === count( $parte['productos'] ) ) ? $parte['productos'][0]->ID : '';
 					?>
 					<button
 						type="button"
 						class="gp-hotspot<?php echo $vacio ? ' gp-hotspot--vacio' : ''; ?>"
 						style="left:<?php echo esc_attr( $parte['x'] ); ?>%;top:<?php echo esc_attr( $parte['y'] ); ?>%;"
 						data-parte="<?php echo esc_attr( $parte['slug'] ); ?>"
+						data-nombre="<?php echo esc_attr( $parte['nombre'] ); ?>"
 						<?php if ( $solo_id ) : ?>data-gp-solo="<?php echo esc_attr( $solo_id ); ?>"<?php endif; ?>
+						<?php /* En el archivo un corte sin productos no filtra nada; en el home sí avisa "Próximamente". */ ?>
+						<?php disabled( $vacio && ! $es_popup, true ); ?>
 						aria-label="<?php echo esc_attr( $parte['nombre'] ); ?>"
 					><span class="gp-hotspot__anillo"></span></button>
 				<?php endforeach; ?>
+
+				<?php if ( ! $es_popup ) : ?>
+					<span class="gp-etiqueta" data-gp-etiqueta hidden></span>
+				<?php endif; ?>
 			</div>
 
-			<?php foreach ( $partes as $parte ) : ?>
-				<?php $productos = $parte['productos']; ?>
-				<template data-gp-popover="<?php echo esc_attr( $parte['slug'] ); ?>">
-					<div class="gp-popover__titulo"><?php echo esc_html( $parte['nombre'] ); ?></div>
-					<?php if ( $productos ) : ?>
-						<ul class="gp-popover__lista">
-							<?php foreach ( $productos as $post ) : ?>
-								<li>
-									<button type="button" data-gp-open="<?php echo esc_attr( $post->ID ); ?>">
-										<?php if ( has_post_thumbnail( $post ) ) : ?>
-											<?php echo get_the_post_thumbnail( $post, 'thumbnail' ); ?>
-										<?php endif; ?>
-										<span><?php echo esc_html( get_the_title( $post ) ); ?></span>
-									</button>
-								</li>
-							<?php endforeach; ?>
-						</ul>
-					<?php else : ?>
-						<p class="gp-popover__vacio"><?php esc_html_e( 'Próximamente', 'granalier-productos' ); ?></p>
-					<?php endif; ?>
-				</template>
-				<?php $this->render_templates_producto( wp_list_pluck( $productos, 'ID' ) ); ?>
-			<?php endforeach; ?>
+			<?php if ( $es_popup ) : ?>
+				<?php foreach ( $partes as $parte ) : ?>
+					<?php $productos = $parte['productos']; ?>
+					<template data-gp-popover="<?php echo esc_attr( $parte['slug'] ); ?>">
+						<div class="gp-popover__titulo"><?php echo esc_html( $parte['nombre'] ); ?></div>
+						<?php if ( $productos ) : ?>
+							<ul class="gp-popover__lista">
+								<?php foreach ( $productos as $post ) : ?>
+									<li>
+										<button type="button" data-gp-open="<?php echo esc_attr( $post->ID ); ?>">
+											<?php if ( has_post_thumbnail( $post ) ) : ?>
+												<?php echo get_the_post_thumbnail( $post, 'thumbnail' ); ?>
+											<?php endif; ?>
+											<span><?php echo esc_html( get_the_title( $post ) ); ?></span>
+										</button>
+									</li>
+								<?php endforeach; ?>
+							</ul>
+						<?php else : ?>
+							<p class="gp-popover__vacio"><?php esc_html_e( 'Próximamente', 'granalier-productos' ); ?></p>
+						<?php endif; ?>
+					</template>
+					<?php $this->render_templates_producto( wp_list_pluck( $productos, 'ID' ) ); ?>
+				<?php endforeach; ?>
 
-			<div class="gp-popover" data-gp-popover-render hidden></div>
+				<div class="gp-popover" data-gp-popover-render hidden></div>
+			<?php else : ?>
+				<?php /* En mobile los puntos quedan chicos para el dedo: los nombres se pueden tocar igual. */ ?>
+				<ul class="gp-chancho__lista">
+					<?php foreach ( $partes as $parte ) : ?>
+						<li>
+							<button
+								type="button"
+								class="gp-parte-chip"
+								data-parte="<?php echo esc_attr( $parte['slug'] ); ?>"
+								data-nombre="<?php echo esc_attr( $parte['nombre'] ); ?>"
+								<?php disabled( empty( $parte['productos'] ), true ); ?>
+							><?php echo esc_html( $parte['nombre'] ); ?></button>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
 		</div>
 		<?php
-		return ob_get_clean();
 	}
 
 	/* ---------------------------------------------------------------

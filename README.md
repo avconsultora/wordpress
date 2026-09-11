@@ -30,13 +30,22 @@ Los puntos ya no se cargan con el plugin "hotspot" anterior: se ubican desde **P
 - Si hay varios, el clic muestra la lista y desde ahí se abre cada uno.
 - Los puntos sin producto cargado todavía se ven más tenues y dicen "Próximamente".
 
+### El chanchito dentro del archivo
+
+En el listado de productos el diagrama no es decorativo: es un segundo filtro, que se cruza con el de categorías.
+
+- **Desktop**: va en una columna a la derecha, *sticky* (acompaña el scroll pero se queda dentro de la sección, sin taparte el header ni montarse al footer; el desfasaje se ajusta con la variable CSS `--gp-chancho-top`, por defecto 100px). Pasás el mouse por un producto y se prenden los puntos de sus cortes; pasás por un punto y se resaltan sus productos mientras el resto se atenúa; hacés clic en un punto y la grilla queda filtrada por ese corte, con un chip para quitarlo.
+- **Mobile**: no hay sticky ni hover. Aparece un botón flotante **"Ver por corte"** (solo mientras el archivo está a la vista) que abre el diagrama en un panel inferior a ancho completo, con los puntos más grandes y, debajo, los nombres de los cortes como chips tocables — los puntos quedan chicos para el dedo, los nombres no. Al elegir uno, filtra y cierra el panel.
+
+Los cortes sin productos cargados se ven atenuados y no filtran.
+
 Vienen 11 partes precargadas sin ubicar (Cabeza, Papada, Bondiola, Paleta, Carré, Lomo, Costillar, Panceta, Matambre, Jamón, Pata) — se pueden renombrar, borrar o agregar más, como cualquier taxonomía.
 
 ## Shortcodes
 
 | Shortcode | Qué hace |
 |---|---|
-| `[granalier_productos_archivo]` | Listado completo de productos con filtro de categorías en vivo (sin recargar la página). |
+| `[granalier_productos_archivo chancho="si"]` | Listado completo con filtro de categorías en vivo y el chanchito al costado como segundo filtro. `chancho="no"` lo saca. |
 | `[granalier_productos_destacados cantidad="6" categoria=""]` | Grilla de productos destacados para el home, misma estética de tarjeta que el archivo pero sin fondo. `categoria` es opcional (slug de `cat-prod`). |
 | `[granalier_chancho]` | El diagrama interactivo, para insertar en el home. |
 | `[granalier_producto id="123"]` | Ficha de un producto puntual embebida en la página (no en popup). También acepta `slug="..."`. |
