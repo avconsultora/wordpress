@@ -93,7 +93,17 @@ function gp_render_detalle( $data, $echo = true ) {
 	<div class="gp-detalle" data-id="<?php echo esc_attr( $data['id'] ); ?>">
 		<?php if ( $data['imagen_grande'] ) : ?>
 			<div class="gp-detalle__media">
-				<img src="<?php echo esc_url( $data['imagen_grande'] ); ?>" alt="<?php echo esc_attr( $data['titulo'] ); ?>" loading="lazy" />
+				<?php
+				echo get_the_post_thumbnail(
+					$data['id'],
+					'large',
+					array(
+						'alt'     => $data['titulo'],
+						'loading' => 'lazy',
+						'sizes'   => '(max-width: 640px) 88vw, 320px',
+					)
+				);
+				?>
 			</div>
 		<?php endif; ?>
 		<div class="gp-detalle__info">

@@ -78,6 +78,20 @@ El plugin no pisa la tipografía del theme: hereda `font-family`, tamaños y `li
 
 **Por qué hay `!important` en algunas reglas:** las tarjetas y los filtros son `<button>` y las fotos son `<img>`, y Elementor genera reglas como `.elementor-kit-9 button { ... }` / `.elementor-kit-9 img { height: auto }` que cargan después del plugin y le ganan a una clase suelta. Sin blindaje, las tarjetas heredan los botones del sitio (fondo blanco, borde del color de acento, títulos cortados por `white-space: nowrap`) y las fotos dejan de recortarse. Por eso los selectores van anclados al contenedor (`.gp-grid .gp-card`), el CSS se encola con prioridad tardía y las pocas propiedades que el theme pisa llevan `!important`.
 
+## Imágenes
+
+En **Ajustes → Granalier Productos → Imágenes**:
+
+- **Convertir a WebP**: usa el filtro `image_editor_output_format` de WordPress (core 5.8+), así que no hace falta ninguna librería ni plugin extra. Genera en WebP los tamaños derivados de cada imagen **que se suba de ahí en adelante**; el archivo original queda como se subió. Si el servidor no puede escribir WebP (ni Imagick ni GD), la opción aparece deshabilitada con el aviso correspondiente.
+- **Calidad de compresión**: 40-100, por defecto 82 (el valor de WordPress). Bajarla a 70-75 achica bastante sin diferencia visible.
+
+Dos cosas que esto **no** hace, para no generar expectativas equivocadas:
+
+- No toca las imágenes que ya están en la biblioteca. Para convertirlas hay que regenerar miniaturas (plugin *Regenerate Thumbnails* o `wp media regenerate` por WP-CLI) después de activar la opción.
+- No recomprime el archivo original ni hace optimización con pérdida agresiva. Para eso conviene un plugin dedicado (ShortPixel, EWWW, Imagify), que además procesa el backlog en lote.
+
+Aparte de eso, las tarjetas y la ficha emiten `srcset`/`sizes` vía `get_the_post_thumbnail()`: el navegador se baja la medida que corresponde al tamaño real en pantalla en vez de una de 768px para una tarjeta de 230px. Esto aplica a **todas** las imágenes, incluidas las ya cargadas, sin volver a subir nada.
+
 ## Fase 2 (pendiente, ya con lugar preparado)
 
 - **Descripción del producto**: no está en el MVP a propósito. Cuando esté aprobada por la empresa, se puede sumar como un campo ACF más (`descripcion`) y mostrarla en `gp_render_detalle()` (`includes/helpers.php`) sin tocar el resto.

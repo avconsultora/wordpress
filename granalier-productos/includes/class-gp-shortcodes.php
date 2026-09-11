@@ -65,7 +65,19 @@ class GP_Shortcodes {
 			aria-haspopup="dialog">
 			<?php if ( $data['imagen'] ) : ?>
 				<span class="gp-card__media">
-					<img src="<?php echo esc_url( $data['imagen'] ); ?>" alt="<?php echo esc_attr( $data['titulo'] ); ?>" loading="lazy" />
+					<?php
+					/* get_the_post_thumbnail() agrega srcset: el navegador se baja
+					   la medida que corresponde al tamaño real de la tarjeta. */
+					echo get_the_post_thumbnail(
+						$data['id'],
+						'medium_large',
+						array(
+							'alt'     => $data['titulo'],
+							'loading' => 'lazy',
+							'sizes'   => '(max-width: 600px) 46vw, (max-width: 900px) 31vw, 300px',
+						)
+					);
+					?>
 				</span>
 			<?php endif; ?>
 			<span class="gp-card__body">

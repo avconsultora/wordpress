@@ -54,6 +54,26 @@ class GP_Settings {
 		register_setting( 'gp_ajustes', 'gp_whatsapp_numero', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 		register_setting( 'gp_ajustes', 'gp_whatsapp_mensaje', array( 'sanitize_callback' => 'sanitize_text_field' ) );
 		register_setting( 'gp_ajustes', 'gp_chancho_imagen', array( 'sanitize_callback' => 'esc_url_raw' ) );
+
+		register_setting(
+			'gp_ajustes_img',
+			'gp_webp',
+			array(
+				'sanitize_callback' => function ( $valor ) {
+					return $valor ? '1' : '';
+				},
+			)
+		);
+		register_setting(
+			'gp_ajustes_img',
+			'gp_calidad',
+			array(
+				'sanitize_callback' => function ( $valor ) {
+					$valor = (int) $valor;
+					return ( $valor >= 40 && $valor <= 100 ) ? $valor : GP_Imagenes::CALIDAD_DEFAULT;
+				},
+			)
+		);
 	}
 
 	public function render() {
@@ -90,6 +110,40 @@ class GP_Settings {
 								<?php $preview = get_option( 'gp_chancho_imagen', '' ) ? get_option( 'gp_chancho_imagen' ) : self::IMAGEN_DEFAULT; ?>
 								<img src="<?php echo esc_url( $preview ); ?>" style="max-width:100%;background:#5c1414;padding:1rem;border-radius:8px;" />
 							</div>
+						</td>
+					</tr>
+				</table>
+				<?php submit_button(); ?>
+			</form>
+
+			<hr />
+			<h2><?php esc_html_e( 'Imágenes', 'granalier-productos' ); ?></h2>
+			<form method="post" action="options.php">
+				<?php settings_fields( 'gp_ajustes_img' ); ?>
+				<table class="form-table">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Convertir a WebP', 'granalier-productos' ); ?></th>
+						<td>
+							<?php if ( GP_Imagenes::webp_disponible() ) : ?>
+								<label>
+									<input type="checkbox" name="gp_webp" value="1" <?php checked( get_option( 'gp_webp' ), '1' ); ?> />
+									<?php esc_html_e( 'Generar en WebP los tamaños de las imágenes que se suban', 'granalier-productos' ); ?>
+								</label>
+								<p class="description">
+									<?php esc_html_e( 'Solo afecta a las imágenes nuevas: las que ya están cargadas siguen igual hasta que se regeneren las miniaturas. El archivo original queda como se subió.', 'granalier-productos' ); ?>
+								</p>
+							<?php else : ?>
+								<p class="description">
+									<?php esc_html_e( 'Este servidor no puede escribir WebP (ni Imagick ni GD lo soportan), así que la conversión no está disponible. Se pueden subir las imágenes ya convertidas.', 'granalier-productos' ); ?>
+								</p>
+							<?php endif; ?>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><label for="gp_calidad"><?php esc_html_e( 'Calidad de compresión', 'granalier-productos' ); ?></label></th>
+						<td>
+							<input type="number" id="gp_calidad" name="gp_calidad" min="40" max="100" value="<?php echo esc_attr( get_option( 'gp_calidad', GP_Imagenes::CALIDAD_DEFAULT ) ); ?>" class="small-text" />
+							<p class="description"><?php esc_html_e( 'Entre 40 y 100. WordPress usa 82 por defecto; bajar a 70-75 suele achicar bastante sin que se note.', 'granalier-productos' ); ?></p>
 						</td>
 					</tr>
 				</table>
