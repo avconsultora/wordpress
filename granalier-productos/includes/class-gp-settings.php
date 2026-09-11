@@ -97,6 +97,40 @@ class GP_Settings {
 			</form>
 
 			<hr />
+			<h2><?php esc_html_e( 'Estado del diagrama', 'granalier-productos' ); ?></h2>
+			<?php
+			$terminos  = get_terms(
+				array(
+					'taxonomy'   => GP_Parte_Cerdo::TAXONOMY,
+					'hide_empty' => false,
+				)
+			);
+			$total     = is_wp_error( $terminos ) ? 0 : count( $terminos );
+			$ubicados  = count( GP_Parte_Cerdo::obtener_partes() );
+			$con_corte = gp_productos_con_corte();
+			$productos = (int) wp_count_posts( 'producto' )->publish;
+			?>
+			<table class="widefat" style="max-width:640px;">
+				<tbody>
+					<tr>
+						<td><?php echo $ubicados ? '✅' : '⚠️'; ?></td>
+						<td><?php esc_html_e( 'Cortes con su punto ubicado en el diagrama', 'granalier-productos' ); ?></td>
+						<td><strong><?php echo esc_html( $ubicados . ' / ' . $total ); ?></strong></td>
+						<td><a href="<?php echo esc_url( admin_url( 'edit-tags.php?taxonomy=parte_cerdo&post_type=producto' ) ); ?>"><?php esc_html_e( 'Ubicar', 'granalier-productos' ); ?></a></td>
+					</tr>
+					<tr>
+						<td><?php echo $con_corte ? '✅' : '⚠️'; ?></td>
+						<td><?php esc_html_e( 'Productos con su parte del cerdo asignada', 'granalier-productos' ); ?></td>
+						<td><strong><?php echo esc_html( $con_corte . ' / ' . $productos ); ?></strong></td>
+						<td><a href="<?php echo esc_url( admin_url( 'edit.php?post_type=producto' ) ); ?>"><?php esc_html_e( 'Asignar', 'granalier-productos' ); ?></a></td>
+					</tr>
+				</tbody>
+			</table>
+			<p class="description">
+				<?php esc_html_e( 'Sin cortes ubicados el diagrama no aparece en el archivo ni en el home. Sin productos asignados aparece, pero no filtra nada.', 'granalier-productos' ); ?>
+			</p>
+
+			<hr />
 			<h2><?php esc_html_e( 'Shortcodes disponibles', 'granalier-productos' ); ?></h2>
 			<ul style="list-style:disc;padding-left:1.5em;">
 				<li><code>[granalier_productos_archivo]</code> — <?php esc_html_e( 'Listado completo con filtro de categorías en vivo.', 'granalier-productos' ); ?></li>

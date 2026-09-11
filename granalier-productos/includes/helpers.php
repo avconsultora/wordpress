@@ -129,6 +129,46 @@ function gp_render_detalle( $data, $echo = true ) {
 }
 
 /**
+ * Cantidad de productos que tienen al menos un corte asignado.
+ */
+function gp_productos_con_corte() {
+	$ids = get_posts(
+		array(
+			'post_type'      => 'producto',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'tax_query'      => array(
+				array(
+					'taxonomy' => 'parte_cerdo',
+					'operator' => 'EXISTS',
+				),
+			),
+		)
+	);
+	return count( $ids );
+}
+
+/**
+ * Aviso que solo ve quien administra el sitio, para que una sección que
+ * no aparece por falta de datos no quede fallando en silencio.
+ */
+function gp_aviso_admin( $mensaje, $url = '', $texto_enlace = '' ) {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	?>
+	<div class="gp-aviso">
+		<strong><?php esc_html_e( 'Granalier Productos', 'granalier-productos' ); ?>:</strong>
+		<?php echo esc_html( $mensaje ); ?>
+		<?php if ( $url ) : ?>
+			<a href="<?php echo esc_url( $url ); ?>"><?php echo esc_html( $texto_enlace ); ?></a>
+		<?php endif; ?>
+		<em><?php esc_html_e( '(Este aviso solo lo ves vos, con sesión de administrador.)', 'granalier-productos' ); ?></em>
+	</div>
+	<?php
+}
+
+/**
  * Silueta simple de cerdo para el botón flotante del archivo en mobile.
  */
 function gp_chancho_icon() {

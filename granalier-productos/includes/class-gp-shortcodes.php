@@ -130,6 +130,22 @@ class GP_Shortcodes {
 		);
 
 		ob_start();
+
+		// Sin puntos ubicados el diagrama no se puede dibujar, pero que
+		// desaparezca sin decir nada hace pensar que el plugin no actualizó.
+		if ( ! $con_chancho && 'no' !== $atts['chancho'] ) {
+			gp_aviso_admin(
+				__( 'el diagrama del chancho no se muestra porque todavía ningún corte tiene su punto ubicado sobre la imagen.', 'granalier-productos' ),
+				admin_url( 'edit-tags.php?taxonomy=parte_cerdo&post_type=producto' ),
+				__( 'Ubicar los cortes →', 'granalier-productos' )
+			);
+		} elseif ( $con_chancho && 0 === gp_productos_con_corte() ) {
+			gp_aviso_admin(
+				__( 'los cortes ya están ubicados, pero ningún producto tiene asignada su parte del cerdo, así que el diagrama no filtra nada todavía.', 'granalier-productos' ),
+				admin_url( 'edit.php?post_type=producto' ),
+				__( 'Asignar cortes a los productos →', 'granalier-productos' )
+			);
+		}
 		?>
 		<div class="gp-archivo<?php echo $con_chancho ? ' gp-archivo--con-chancho' : ''; ?>" data-gp-archivo>
 			<div class="gp-archivo__productos">
@@ -249,6 +265,13 @@ class GP_Shortcodes {
 		$this->encolar_assets();
 
 		ob_start();
+		if ( ! GP_Parte_Cerdo::obtener_partes() ) {
+			gp_aviso_admin(
+				__( 'el diagrama se ve sin puntos porque todavía ningún corte tiene su ubicación cargada.', 'granalier-productos' ),
+				admin_url( 'edit-tags.php?taxonomy=parte_cerdo&post_type=producto' ),
+				__( 'Ubicar los cortes →', 'granalier-productos' )
+			);
+		}
 		$this->render_chancho( 'popup' );
 		return ob_get_clean();
 	}

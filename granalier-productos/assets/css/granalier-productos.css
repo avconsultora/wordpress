@@ -911,3 +911,28 @@ body.gp-modal-abierto {
 		padding: 1em 1.2em !important;
 	}
 }
+
+/* ---------- Aviso para el administrador ---------- */
+.gp-aviso {
+	background: #fff7e6;
+	border-left: 4px solid var(--gp-bordo);
+	color: var(--gp-tinta);
+	padding: 0.9rem 1.1rem;
+	margin: 0 0 1.5rem;
+	font-size: 0.9rem;
+	line-height: 1.5;
+	border-radius: 4px;
+}
+
+.gp-aviso a {
+	color: var(--gp-bordo);
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+.gp-aviso em {
+	display: block;
+	margin-top: 0.3rem;
+	opacity: 0.65;
+	font-size: 0.8rem;
+}
