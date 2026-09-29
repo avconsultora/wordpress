@@ -53,8 +53,20 @@ h2{font-size:20px;color:var(--y);text-shadow:3px 3px 0 var(--vd);line-height:1.3
   cursor:pointer;touch-action:manipulation;box-shadow:inset -4px -4px 0 var(--vd),inset 4px 4px 0 var(--vl),0 0 0 3px var(--k),0 0 0 5px var(--w)}
 .btn:active{transform:translate(2px,2px)}
 .btn.big{font-size:18px;padding:20px 12px;color:var(--k);background:var(--y);box-shadow:inset -4px -4px 0 #b88a1c,inset 4px 4px 0 #fff3c0,0 0 0 3px var(--k),0 0 0 5px var(--w)}
-.btn.outline{background:transparent;color:var(--vl);font-size:11px;padding:12px 10px;box-shadow:0 0 0 3px var(--vl);display:flex;align-items:center;justify-content:center;gap:10px;line-height:1.5}
-.btn.outline .px-icon{width:27px;height:27px;flex:none}
+.btn.gift{position:relative;display:flex;align-items:center;justify-content:center;gap:12px;font-size:14px;line-height:1.6;padding:16px 12px;color:var(--k);background:var(--a);
+  box-shadow:inset -4px -4px 0 #b8481a,inset 4px 4px 0 #ffc09a,0 0 0 3px var(--k),0 0 0 5px var(--w);
+  animation:gift-hop 1.8s steps(1) infinite,gift-ring .6s steps(1) infinite}
+.btn.gift .px-icon{width:36px;height:36px;flex:none;animation:gift-wiggle 1.8s steps(1) infinite}
+.btn.gift::before,.btn.gift::after{content:"";position:absolute;width:6px;height:6px;background:var(--w);
+  box-shadow:0 0 0 2px var(--y);animation:gift-spark 1.2s steps(1) infinite;pointer-events:none}
+.btn.gift::before{top:-12px;left:-10px}
+.btn.gift::after{bottom:-12px;right:-10px;animation-delay:.6s}
+.btn.gift:active{animation:none;transform:translate(2px,2px)}
+@keyframes gift-hop{0%,60%,100%{transform:translateY(0)}66%{transform:translateY(-4px)}72%{transform:translateY(0)}78%{transform:translateY(-2px)}84%{transform:translateY(0)}}
+@keyframes gift-wiggle{0%,58%,100%{transform:rotate(0)}64%{transform:rotate(-12deg)}70%{transform:rotate(12deg)}76%{transform:rotate(-8deg)}82%{transform:rotate(0)}}
+@keyframes gift-ring{50%{box-shadow:inset -4px -4px 0 #b8481a,inset 4px 4px 0 #ffc09a,0 0 0 3px var(--k),0 0 0 5px var(--y)}}
+@keyframes gift-spark{0%{opacity:1;transform:scale(1)}33%{opacity:1;transform:scale(.5)}66%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.btn.gift,.btn.gift .px-icon,.btn.gift::before,.btn.gift::after{animation:none}}
 .btn:disabled{opacity:.6}
 .link{font:inherit;font-size:10px;background:none;border:0;color:var(--c3);text-decoration:underline;padding:10px;cursor:pointer}
 
@@ -68,7 +80,7 @@ input:focus{box-shadow:0 0 0 3px var(--vl)}
 .hint{font-size:10px;color:var(--y)}
 .fine{font-size:8px;color:var(--c3);line-height:1.8}
 
-#consulta{width:100%}
+#consulta{width:100%;padding-top:8px}
 .panel{margin-top:4px;padding:16px 12px;background:var(--vd);box-shadow:0 0 0 3px var(--v);text-align:left}
 .panel h3{font-size:12px;color:var(--w);line-height:1.6}
 .panel p.lead{font-size:10px;line-height:1.7;color:var(--vl)}
@@ -182,7 +194,7 @@ input:focus{box-shadow:0 0 0 3px var(--vl)}
   </div>
 
   <div id="consulta" hidden>
-    <button id="cBtn" class="btn outline" type="button">GANASTE UNA CONSULTA GRATIS</button>
+    <button id="cBtn" class="btn gift" type="button">GANASTE UNA CONSULTA GRATIS</button>
     <form id="cPanel" class="panel" hidden>
       <h3>Consulta inicial gratis con AV</h3>
       <p class="lead">Dejanos tu WhatsApp y te escribimos para coordinar.</p>
