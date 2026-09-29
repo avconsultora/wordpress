@@ -19,7 +19,7 @@ export const CONFIG = {
   overshootLimit: 1.5,    // pisos de más antes de terminar la partida sola
   roundTransitionMs: 1100,// pausa de festejo entre rondas
   missRevealMs: 750,      // cuánto se ve el error antes de la pantalla de game over
-  consultaMinScore: 5,    // aciertos para ganar la consulta gratis (0 = siempre)
+  consultaMinScore: 1,    // aciertos para ganar la consulta gratis (0 = siempre)
 };
 
 // ── Evento y ranking ───────────────────────────────────────────────────────

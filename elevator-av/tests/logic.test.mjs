@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { CONFIG, PHRASES } from '../public/config.js';
 import {
   difficultyFor, evaluateStop, HIT, OVER, SHORT, minDurationMs, cleanNickname,
-  moderateNickname, isBadNickname, normalizeWhatsapp, isValidWhatsapp, pickIndex, wrapPhrase,
+  moderateNickname, isBadNickname, normalizeWhatsapp, isValidWhatsapp, pickIndex, wrapPhrase, nextPhrase,
 } from '../public/logic.js';
 
 test('la primera ronda usa los valores iniciales', () => {
@@ -104,4 +104,26 @@ test('sprites: todas las filas tienen el mismo ancho', async () => {
   check('logo18', S.LOGO_18, 18);
   check('logo32', S.LOGO_32, 32);
   for (const k in S.ICONS) check(k, S.ICONS[k]);
+});
+
+test('frases: salen todas antes de repetir y nunca dos iguales seguidas', () => {
+  const st = {};
+  let prev = -1;
+  for (let round = 0; round < 50; round++) {
+    const seen = new Set();
+    for (let k = 0; k < 15; k++) {
+      const i = nextPhrase(st, 15);
+      assert.notEqual(i, prev);
+      assert.ok(!seen.has(i));
+      seen.add(i);
+      prev = i;
+    }
+    assert.equal(seen.size, 15);
+  }
+});
+
+test('frases: la bolsa guardada sobrevive a datos viejos o rotos', () => {
+  const st = { bag: [3, 99, 'x', -1], last: 5 };
+  assert.equal(nextPhrase(st, 15), 3);
+  assert.ok(nextPhrase(st, 15) !== 3);
 });

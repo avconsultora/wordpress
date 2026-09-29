@@ -91,6 +91,29 @@ export function isValidWhatsapp(raw) {
   return /^\+?[0-9]{8,15}$/.test(normalizeWhatsapp(raw));
 }
 
+// Bolsa de frases: salen todas en orden aleatorio antes de repetir alguna,
+// y la primera de una bolsa nueva nunca es igual a la última de la anterior.
+// `state` = { bag: [índices pendientes], last: índice }. Se modifica en el lugar.
+export function nextPhrase(state, length, rnd = Math.random) {
+  if (!Array.isArray(state.bag)) state.bag = [];
+  state.bag = state.bag.filter((i) => Number.isInteger(i) && i >= 0 && i < length);
+  if (!state.bag.length) {
+    const bag = [];
+    for (let i = 0; i < length; i++) bag.push(i);
+    for (let i = bag.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      const t = bag[i]; bag[i] = bag[j]; bag[j] = t;
+    }
+    // se saca desde el final: que el próximo no sea el último mostrado
+    if (length > 1 && bag[bag.length - 1] === state.last) {
+      const t = bag[0]; bag[0] = bag[bag.length - 1]; bag[bag.length - 1] = t;
+    }
+    state.bag = bag;
+  }
+  state.last = state.bag.pop();
+  return state.last;
+}
+
 // Frase al azar sin repetir la anterior.
 export function pickIndex(length, previous, rnd = Math.random) {
   if (length <= 1) return 0;

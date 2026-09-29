@@ -2,7 +2,7 @@
 // Los números de gameplay viven en config.js (CONFIG).
 import { CONFIG, PHRASES, EVENT_ID } from './config.js';
 import {
-  difficultyFor, evaluateStop, HIT, OVER, pickIndex, wrapPhrase,
+  difficultyFor, evaluateStop, HIT, OVER, nextPhrase, wrapPhrase,
   cleanNickname, moderateNickname, normalizeWhatsapp, isValidWhatsapp,
 } from './logic.js';
 import * as S from './sprites.js';
@@ -20,6 +20,7 @@ const store = {
 const KEY_BEST = 'eav_best';
 const KEY_NICK = 'eav_nick';
 const KEY_LEAD = 'eav_lead_' + EVENT_ID;
+const KEY_PHRASES = 'eav_phrases';
 
 const $ = (id) => document.getElementById(id);
 
@@ -118,7 +119,9 @@ function boot() {
   let lastT = 0, acceptAfter = 0, clock = 0;
   let gameId = '', gameStart = 0, durationMs = 0, maxFloor = 1;
   const diff = {};
-  let lastPhrase = -1;
+  // bolsa de frases, guardada para que tampoco se repitan entre partidas
+  const phraseState = { bag: [], last: -1 };
+  try { Object.assign(phraseState, JSON.parse(store.get(KEY_PHRASES) || '{}')); } catch (e) { /* */ }
   // animación de la oficina AV
   const office = { floor: -1, t: 0, who: 0, lines: [''], active: false };
   let prevAvFloor = -1;
@@ -178,8 +181,8 @@ function boot() {
     office.t = 0;
     office.active = true;
     office.who = Math.random() < 0.5 ? 0 : 1;
-    lastPhrase = pickIndex(PHRASES.length, lastPhrase);
-    office.lines = wrapPhrase(PHRASES[lastPhrase], 14);
+    office.lines = wrapPhrase(PHRASES[nextPhrase(phraseState, PHRASES.length)], 14);
+    store.set(KEY_PHRASES, JSON.stringify(phraseState));
     if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) { /* */ } }
   }
 
@@ -438,6 +441,11 @@ function boot() {
     }
   });
 
+  // Cada toque despierta el audio si el navegador lo suspendió.
+  ['pointerdown', 'touchend', 'click'].forEach((ev) => {
+    document.addEventListener(ev, sfx.unlock, { capture: true, passive: true });
+  });
+
   // Nada de zoom, menú contextual ni selección.
   ['gesturestart', 'gesturechange', 'dblclick', 'contextmenu'].forEach((ev) => {
     document.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
@@ -486,19 +494,7 @@ function boot() {
   const logo = S.logoCanvas();
   logo.className = 'logo';
   $('introLogo').replaceWith(logo);
-  $('introIcon').replaceWith(avIcon());
   $('snd').appendChild(S.iconCanvas('soundOff'));
-
-  function avIcon() {
-    const c = S.makeCanvas(26, 16);
-    const x = c.getContext('2d');
-    x.fillStyle = S.PAL.V; x.fillRect(0, 0, 26, 16);
-    x.fillStyle = S.PAL.VL; x.fillRect(0, 0, 26, 1); x.fillRect(0, 15, 26, 1);
-    x.fillStyle = S.PAL.W; x.fillRect(3, 2, 20, 12);
-    S.paint(x, S.LOGO_18, 4, 3, { '#': 'V' });
-    c.className = 'px-icon av-icon';
-    return c;
-  }
 
   $('play').addEventListener('click', () => { sfx.blip(); startGame(); });
   document.querySelectorAll('.again').forEach((b) => b.addEventListener('click', () => { sfx.blip(); startGame(); }));
@@ -607,19 +603,16 @@ function boot() {
   const doneChar = chars[0].wave.map((c) => { const k = c.cloneNode(); k.getContext('2d').drawImage(c, 0, 0); k.className = 'px-icon wave-char'; return k; });
   let doneTimer = 0, cSending = false;
 
-  function consultaState() {
-    if (store.get(KEY_LEAD)) return 'asked';
-    if (lastScore < CONFIG.consultaMinScore) return 'hidden';
-    return 'button';
-  }
-
+  // El botón aparece desde consultaMinScore aciertos y no desaparece:
+  // aunque ya la haya pedido, puede volver a abrirlo (la base no duplica el WhatsApp).
   function mountConsulta(containerId) {
     $(containerId).appendChild(consulta);
-    const st = consultaState();
-    consulta.hidden = st === 'hidden';
-    cBtn.hidden = st !== 'button' || !cPanel.hidden;
-    cAsked.hidden = st !== 'asked';
-    if (st !== 'button') cPanel.hidden = true;
+    consulta.hidden = lastScore < CONFIG.consultaMinScore;
+    clearInterval(doneTimer);
+    cDone.hidden = true;
+    cPanel.hidden = true;
+    cBtn.hidden = false;
+    cAsked.hidden = !store.get(KEY_LEAD);
   }
 
   cBtn.addEventListener('click', () => {
@@ -665,6 +658,7 @@ function boot() {
       setTimeout(() => {
         clearInterval(doneTimer);
         cDone.hidden = true;
+        cBtn.hidden = false;
         cAsked.hidden = false;
       }, 2600);
     } catch (err) {
