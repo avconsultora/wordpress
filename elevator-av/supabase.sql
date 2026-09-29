@@ -26,14 +26,14 @@ insert into public.banned_words (word) values
 on conflict do nothing;
 
 create or replace function public.fold_text(t text) returns text
-language sql immutable as $$
+language sql immutable as $fn$
   select translate(lower(t),
     'áàäâéèëêíìïîóòöôúùüûñ0134578',
     'aaaaeeeeiiiioooouuuunoieastb')
-$$;
+$fn$;
 
 create or replace function public.moderate_nickname(raw text) returns text
-language plpgsql stable security definer set search_path = public as $$
+language plpgsql stable security definer set search_path = public as $fn$
 declare
   nick text;
   folded text;
@@ -55,14 +55,14 @@ begin
     nick := 'JUGADOR' || lpad((floor(random() * 10000))::int::text, 4, '0');
   end if;
   return nick;
-end $$;
+end $fn$;
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- Anti-trampa: duración mínima teórica para un score.
 -- Mantener sincronizado con CONFIG en config.js. Se aplica con 40% de margen.
 -- ═══════════════════════════════════════════════════════════════════════════
 create or replace function public.min_duration_ms(p_score int) returns int
-language plpgsql immutable as $$
+language plpgsql immutable as $fn$
 declare
   start_speed  numeric := 1.6;
   speed_mult   numeric := 1.09;
@@ -87,7 +87,7 @@ begin
     ms := ms + ((mn - tol) / speed) * 1000 + transition;
   end loop;
   return floor(ms * margin);
-end $$;
+end $fn$;
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- Scores
@@ -106,7 +106,7 @@ create index if not exists scores_event_score_idx on public.scores (event_id, sc
 create index if not exists scores_event_nick_idx on public.scores (event_id, nickname, created_at desc);
 
 create or replace function public.scores_before_insert() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public as $fn$
 begin
   -- el cliente no elige id ni fecha
   new.id := gen_random_uuid();
@@ -128,7 +128,7 @@ begin
     raise exception 'too many submissions' using errcode = 'check_violation';
   end if;
   return new;
-end $$;
+end $fn$;
 
 drop trigger if exists scores_before_insert on public.scores;
 create trigger scores_before_insert before insert on public.scores
@@ -146,7 +146,7 @@ create policy scores_select on public.scores for select to anon, authenticated u
 
 -- Ranking: top 10 del evento (mejor score por nickname) + puesto de una partida.
 create or replace function public.get_ranking(p_event_id text, p_game_id uuid default null)
-returns json language sql stable set search_path = public as $$
+returns json language sql stable set search_path = public as $fn$
   with best as (
     select distinct on (nickname) nickname, score, created_at
     from public.scores
@@ -163,7 +163,7 @@ returns json language sql stable set search_path = public as $$
     'me',    (select row_to_json(m) from (select pos, nickname, score from ranked where nickname = (select nickname from mine)) m),
     'total', (select count(*) from best)
   )
-$$;
+$fn$;
 grant execute on function public.get_ranking(text, uuid) to anon, authenticated;
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -174,7 +174,7 @@ grant execute on function public.get_ranking(text, uuid) to anon, authenticated;
 create table if not exists public.leads (
   id          uuid primary key default gen_random_uuid(),
   event_id    text not null check (char_length(event_id) between 1 and 60),
-  whatsapp    text not null check (whatsapp ~ '^\+?[0-9]{8,15}$'),
+  whatsapp    text not null check (whatsapp ~ '^\+?[0-9]{8,15}\Z'),
   nombre      text check (nombre is null or char_length(nombre) <= 40),
   nickname    text check (nickname is null or char_length(nickname) <= 12),
   score       int  not null default 0 check (score between 0 and 200),
@@ -191,13 +191,13 @@ create or replace function public.submit_lead(
   p_event_id text, p_whatsapp text, p_nombre text default null,
   p_nickname text default null, p_score int default 0
 ) returns boolean
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public as $fn$
 declare
   wa text;
 begin
   wa := btrim(coalesce(p_whatsapp, ''));
   wa := case when left(wa, 1) = '+' then '+' else '' end || regexp_replace(wa, '[^0-9]', '', 'g');
-  if wa !~ '^\+?[0-9]{8,15}$' then
+  if wa !~ '^\+?[0-9]{8,15}\Z' then
     raise exception 'invalid whatsapp' using errcode = 'check_violation';
   end if;
   insert into public.leads (event_id, whatsapp, nombre, nickname, score)
@@ -210,7 +210,7 @@ begin
   )
   on conflict (event_id, whatsapp) do nothing;
   return true;
-end $$;
+end $fn$;
 
 revoke all on function public.submit_lead(text, text, text, text, int) from public;
 grant execute on function public.submit_lead(text, text, text, text, int) to anon, authenticated;
