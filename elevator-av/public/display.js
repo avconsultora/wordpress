@@ -1,9 +1,9 @@
 // Vista de pantalla grande (?display=1): ranking + QR, se actualiza sola.
-import { GAME_URL, DISPLAY_REFRESH_MS } from './config.js';
-import { fetchRanking } from './ranking.js';
-import { qrCanvas } from './qr.js';
-import * as S from './sprites.js';
-import { renderRanking } from './game.js';
+import { GAME_URL, DISPLAY_REFRESH_MS } from './config.js?v=4';
+import { fetchRanking } from './ranking.js?v=4';
+import { qrCanvas } from './qr.js?v=4';
+import * as S from './sprites.js?v=4';
+import { renderRanking } from './game.js?v=4';
 
 const $ = (id) => document.getElementById(id);
 
@@ -42,3 +42,4 @@ async function refresh() {
 
 refresh();
 setInterval(refresh, DISPLAY_REFRESH_MS);
+window.__eavBooted = true;

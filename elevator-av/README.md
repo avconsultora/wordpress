@@ -97,6 +97,15 @@ No hay build: se sube la carpeta `public/` tal cual.
 
 El `.htaccess` incluido fuerza HTTPS, activa gzip, pone cache largo a la fuente y revalida siempre `index.html` y `config.js`, así los cambios se ven al toque. El resto del JS queda cacheado 10 minutos.
 
+### Al actualizar archivos
+
+Cada `.js` se carga con un número de versión (`game.js?v=4`). Así el navegador nunca mezcla archivos viejos de la caché con archivos nuevos. Al subir una actualización:
+
+- subí **todos** los archivos que cambiaron, junto con el `index.html`;
+- no hace falta tocar `config.js` salvo que quieras cambiar algo de configuración.
+
+Si algo no carga, en 6 segundos aparece "No se pudo cargar el juego" con un botón RECARGAR y el error exacto en letra chica. Mandame ese texto si pasa.
+
 > El juego usa módulos ES, así que no funciona abriendo `index.html` con doble click (`file://`). Para probarlo en la compu: `npx http-server public`.
 
 ---

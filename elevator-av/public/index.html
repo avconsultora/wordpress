@@ -12,11 +12,11 @@
 <title>ELEVATOR AV</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Crect width='8' height='8' fill='%2378328a'/%3E%3Cpath d='M1 2h3v4H1zM5 2h1v3h1V2h1v4H5z' fill='%23f2ead8'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/PressStart2P-subset.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="modulepreload" href="config.js">
-<link rel="modulepreload" href="logic.js">
-<link rel="modulepreload" href="sprites.js">
-<link rel="modulepreload" href="audio.js">
-<link rel="modulepreload" href="ranking.js">
+<link rel="modulepreload" href="config.js?v=4">
+<link rel="modulepreload" href="logic.js?v=4">
+<link rel="modulepreload" href="sprites.js?v=4">
+<link rel="modulepreload" href="audio.js?v=4">
+<link rel="modulepreload" href="ranking.js?v=4">
 <style>
 @font-face{font-family:PS2P;src:url(fonts/PressStart2P-subset.woff2) format('woff2');font-display:block}
 :root{--k:#0b0a10;--c1:#23222b;--c2:#43414d;--c3:#77747f;--vd:#3a1648;--v:#78328a;--vl:#c07fd6;--y:#f6c945;--w:#f2ead8;--a:#ff7a3d}
@@ -229,6 +229,25 @@ input:focus{box-shadow:0 0 0 3px var(--vl)}
 </div>
 
 <noscript><p style="padding:20px">Activá JavaScript para jugar.</p></noscript>
-<script type="module" src="game.js"></script>
+<script>
+// Si el juego no arranca (archivos mezclados de versiones distintas, red caída), avisar.
+(function () {
+  var errs = [];
+  window.addEventListener('error', function (e) {
+    errs.push(e.message || ((e.target && (e.target.src || e.target.href)) || 'error de carga'));
+  }, true);
+  setTimeout(function () {
+    if (window.__eavBooted) return;
+    var d = document.createElement('div');
+    d.id = 'bootFail';
+    d.style.cssText = 'position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;gap:18px;align-items:center;justify-content:center;padding:24px;text-align:center;background:#0b0a10;color:#f2ead8;font:12px/1.8 PS2P,monospace';
+    d.innerHTML = '<p>No se pudo cargar el juego.</p><button style="font:inherit;font-size:14px;padding:16px 24px;border:0;background:#f6c945;color:#0b0a10">RECARGAR</button><p style="font-size:8px;color:#77747f;max-width:320px;word-break:break-word"></p>';
+    d.querySelector('button').onclick = function () { location.reload(); };
+    d.lastChild.textContent = errs.slice(0, 2).join(' · ');
+    document.body.appendChild(d);
+  }, 6000);
+})();
+</script>
+<script type="module" src="game.js?v=4"></script>
 </body>
 </html>

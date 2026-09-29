@@ -1,13 +1,13 @@
 // ELEVATOR AV — motor del juego.
 // Los números de gameplay viven en config.js (CONFIG).
-import { CONFIG, PHRASES, EVENT_ID } from './config.js';
+import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=4';
 import {
   difficultyFor, evaluateStop, HIT, OVER, nextPhrase, wrapPhrase,
   cleanNickname, moderateNickname, normalizeWhatsapp, isValidWhatsapp,
-} from './logic.js';
-import * as S from './sprites.js';
-import * as sfx from './audio.js';
-import { submitScore, fetchRanking, submitLead, newGameId } from './ranking.js';
+} from './logic.js?v=4';
+import * as S from './sprites.js?v=4';
+import * as sfx from './audio.js?v=4';
+import { submitScore, fetchRanking, submitLead, newGameId } from './ranking.js?v=4';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -25,7 +25,7 @@ const KEY_PHRASES = 'eav_phrases';
 const $ = (id) => document.getElementById(id);
 
 if (params.get('display') === '1') {
-  import('./display.js');
+  import('./display.js?v=4');
 } else {
   boot();
 }
@@ -677,6 +677,7 @@ function boot() {
   coarseLandscape.addEventListener && coarseLandscape.addEventListener('change', fit);
   fit();
   requestAnimationFrame(frame);
+  window.__eavBooted = true;
   if (document.fonts && document.fonts.load) {
     document.fonts.load('8px PS2P').then(setFont).catch(() => {});
     document.fonts.ready.then(setFont).catch(() => {});

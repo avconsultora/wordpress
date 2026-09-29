@@ -1,5 +1,5 @@
 // Lógica pura del juego: sin DOM, testeable con `node --test`.
-import { CONFIG, BAD_WORDS } from './config.js';
+import { CONFIG, BAD_WORDS } from './config.js?v=4';
 
 // Dificultad de una ronda. `round` = cantidad de aciertos hasta ahora (0 en la primera).
 export function difficultyFor(round, cfg = CONFIG, out = {}) {
