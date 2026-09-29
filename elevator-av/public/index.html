@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0a10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="Frená el ascensor en el piso AV. Un arcade de AV Marketing Integral.">
+<title>ELEVATOR AV</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' shape-rendering='crispEdges'%3E%3Crect width='8' height='8' fill='%2378328a'/%3E%3Cpath d='M1 2h3v4H1zM5 2h1v3h1V2h1v4H5z' fill='%23f2ead8'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/PressStart2P-subset.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="config.js">
+<link rel="modulepreload" href="logic.js">
+<link rel="modulepreload" href="sprites.js">
+<link rel="modulepreload" href="audio.js">
+<link rel="modulepreload" href="ranking.js">
+<style>
+@font-face{font-family:PS2P;src:url(fonts/PressStart2P-subset.woff2) format('woff2');font-display:block}
+:root{--k:#0b0a10;--c1:#23222b;--c2:#43414d;--c3:#77747f;--vd:#3a1648;--v:#78328a;--vl:#c07fd6;--y:#f6c945;--w:#f2ead8;--a:#ff7a3d}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--k);color:var(--w);overflow:hidden;overscroll-behavior:none;
+  touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  font-family:PS2P,monospace;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{position:fixed;inset:0;height:100dvh}
+#safe{position:fixed;top:0;left:0;width:1px;height:env(safe-area-inset-top,0px);pointer-events:none;visibility:hidden}
+#stage{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;touch-action:none;background:var(--k)}
+#screen{position:absolute;left:0;top:0;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}
+.px-icon{image-rendering:pixelated;image-rendering:crisp-edges}
+
+.screen{position:absolute;inset:0;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 64px);
+  background:rgba(11,10,16,.84);text-align:center;line-height:1.5}
+.screen.on{display:flex}
+.screen.guard *{pointer-events:none}
+.box{margin:auto;width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:14px}
+#pause{background:rgba(11,10,16,.7);cursor:pointer}
+
+h1,h2,h3,p{margin:0;font-weight:normal}
+.title{font-size:26px;letter-spacing:1px;color:var(--w);text-shadow:3px 3px 0 var(--v),6px 6px 0 var(--vd)}
+.logo{width:192px;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+.how{display:flex;align-items:center;gap:10px;font-size:11px;line-height:1.7;text-align:left;max-width:300px}
+.av-icon{width:52px;height:32px;flex:none}
+h2{font-size:20px;color:var(--y);text-shadow:3px 3px 0 var(--vd);line-height:1.3}
+.stat{font-size:12px}
+.record{font-size:14px;color:var(--a);animation:blink .5s steps(1) infinite}
+@keyframes blink{50%{opacity:.35}}
+
+.btn{font:inherit;font-size:13px;color:var(--w);background:var(--v);border:0;border-radius:0;padding:14px 12px;width:100%;
+  cursor:pointer;touch-action:manipulation;box-shadow:inset -4px -4px 0 var(--vd),inset 4px 4px 0 var(--vl),0 0 0 3px var(--k),0 0 0 5px var(--w)}
+.btn:active{transform:translate(2px,2px)}
+.btn.big{font-size:18px;padding:20px 12px;color:var(--k);background:var(--y);box-shadow:inset -4px -4px 0 #b88a1c,inset 4px 4px 0 #fff3c0,0 0 0 3px var(--k),0 0 0 5px var(--w)}
+.btn.outline{background:transparent;color:var(--vl);font-size:11px;padding:12px 10px;box-shadow:0 0 0 3px var(--vl);display:flex;align-items:center;justify-content:center;gap:10px;line-height:1.5}
+.btn.outline .px-icon{width:27px;height:27px;flex:none}
+.btn:disabled{opacity:.6}
+.link{font:inherit;font-size:10px;background:none;border:0;color:var(--c3);text-decoration:underline;padding:10px;cursor:pointer}
+
+form{width:100%;display:flex;flex-direction:column;gap:12px;align-items:stretch}
+label{font-size:10px;line-height:1.6;color:var(--vl);text-align:left;display:flex;flex-direction:column;gap:6px}
+input{font:inherit;font-size:16px;color:var(--w);background:var(--c1);border:0;border-radius:0;padding:12px 10px;width:100%;
+  box-shadow:0 0 0 3px var(--c3);-webkit-user-select:text;user-select:text;touch-action:manipulation;outline:none}
+input:focus{box-shadow:0 0 0 3px var(--vl)}
+#nick{text-transform:uppercase;text-align:center;letter-spacing:2px}
+.err{font-size:10px;color:var(--a);line-height:1.6}
+.hint{font-size:10px;color:var(--y)}
+.fine{font-size:8px;color:var(--c3);line-height:1.8}
+
+#consulta{width:100%}
+.panel{margin-top:4px;padding:16px 12px;background:var(--vd);box-shadow:0 0 0 3px var(--v);text-align:left}
+.panel h3{font-size:12px;color:var(--w);line-height:1.6}
+.panel p.lead{font-size:10px;line-height:1.7;color:var(--vl)}
+.done{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:12px;color:var(--y);padding:10px 0}
+.wave-char{width:48px;height:72px}
+.asked{font-size:9px;color:var(--c3);display:flex;align-items:center;justify-content:center;gap:8px}
+.asked .px-icon{width:14px;height:12px}
+
+#rankList{list-style:none;margin:0;padding:0;width:100%;font-size:12px}
+#rankList li{display:flex;align-items:center;gap:10px;padding:7px 8px;border-bottom:2px solid var(--c1)}
+#rankList .pos{width:28px;text-align:right;color:var(--c3)}
+#rankList .nick{flex:1;text-align:left;overflow:hidden;white-space:nowrap}
+#rankList .sc{color:var(--y)}
+#rankList .p1,#rankList .p2,#rankList .p3{background:var(--vd)}
+#rankList .p1{font-size:14px;background:var(--v)}
+#rankList .p1 .pos,#rankList .p2 .pos,#rankList .p3 .pos{color:var(--y)}
+#rankList .me{box-shadow:inset 0 0 0 2px var(--a)}
+#rankList .empty{justify-content:center;font-size:10px;color:var(--vl);border:0}
+.me-pos{font-size:14px;color:var(--a)}
+.dare{font-size:13px;color:var(--w)}
+.brand{font-size:8px;color:var(--c3);line-height:2;margin-top:6px}
+.brand a{color:var(--vl)}
+
+#snd{position:absolute;right:calc(env(safe-area-inset-right,0px) + 10px);bottom:calc(env(safe-area-inset-bottom,0px) + 10px);z-index:5;
+  width:44px;height:44px;padding:0;border:0;background:rgba(11,10,16,.6);box-shadow:0 0 0 2px var(--c2);display:flex;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation}
+#snd .px-icon{width:27px;height:24px}
+
+#rotate{display:none;position:fixed;inset:0;z-index:20;background:var(--k);color:var(--w);font-size:14px;align-items:center;justify-content:center;flex-direction:column;gap:18px;text-align:center;padding:20px}
+#rotate .ph{width:28px;height:48px;box-shadow:0 0 0 4px var(--vl);animation:rot 1.6s steps(4) infinite}
+@keyframes rot{50%{transform:rotate(90deg)}}
+@media (orientation:landscape) and (pointer:coarse) and (max-height:540px){body:not(.display-mode) #rotate{display:flex}}
+
+/* Pantalla grande */
+#display{position:fixed;inset:0;display:grid;grid-template-columns:1.35fr 1fr;gap:3vw;padding:3vw 4vw;background:var(--k);cursor:none}
+#display[hidden]{display:none}
+.display-mode #stage,.display-mode #rotate{display:none!important}
+.d-left{display:flex;flex-direction:column;gap:2vh;min-height:0}
+.d-head{display:flex;align-items:center;gap:2vw}
+.d-head .logo{width:11vw}
+.d-head h1{font-size:3.4vw;text-shadow:.3vw .3vw 0 var(--v)}
+.d-left h2{font-size:2.4vw}
+#dList{list-style:none;margin:0;padding:0;font-size:2.2vw}
+#dList li{display:flex;gap:2vw;padding:1vh 1vw;border-bottom:.3vw solid var(--c1)}
+#dList .pos{width:4vw;text-align:right;color:var(--c3)}
+#dList .nick{flex:1}
+#dList .sc{color:var(--y)}
+#dList .p1,#dList .p2,#dList .p3{background:var(--vd)}
+#dList .p1{background:var(--v);font-size:2.6vw}
+#dList .p1 .pos,#dList .p2 .pos,#dList .p3 .pos{color:var(--y)}
+#dList .empty{color:var(--vl);font-size:1.6vw}
+.d-right{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;text-align:center}
+.d-right .qr{width:min(28vw,62vh);height:auto;image-rendering:pixelated;box-shadow:0 0 0 .6vw var(--v)}
+.d-right p{font-size:2.3vw;line-height:1.5;color:var(--y);text-shadow:.25vw .25vw 0 var(--vd)}
+.d-right .brand{font-size:1vw}
+#dChar canvas{width:6vw;height:9vw;image-rendering:pixelated}
+.d-row{display:flex;align-items:flex-end;gap:2vw}
+#dStatus{position:fixed;right:1vw;bottom:1vw;font-size:.9vw;color:var(--a)}
+</style>
+</head>
+<body>
+<div id="safe"></div>
+<div id="stage">
+  <canvas id="screen" aria-label="Juego ELEVATOR AV"></canvas>
+
+  <div id="intro" class="screen on">
+    <div class="box">
+      <h1 class="title">ELEVATOR</h1>
+      <canvas id="introLogo"></canvas>
+      <p class="how"><canvas id="introIcon"></canvas><span>Frená el ascensor en el piso AV.</span></p>
+      <button id="play" class="btn big" type="button">JUGAR</button>
+    </div>
+  </div>
+
+  <div id="pause" class="screen">
+    <div class="box">
+      <h2>PAUSA</h2>
+      <p class="stat">TOCÁ PARA SEGUIR</p>
+    </div>
+  </div>
+
+  <div id="over" class="screen">
+    <div class="box">
+      <h2 id="overTitle">TE PASASTE</h2>
+      <p id="overFloor" class="stat">Llegaste al piso 1</p>
+      <p id="overHits" class="stat">Aciertos: 00</p>
+      <p id="overRecord" class="record" hidden>¡NUEVO RÉCORD!</p>
+      <form id="saveForm" autocomplete="off">
+        <label for="nick">¿Cómo aparecés en el ranking?</label>
+        <input id="nick" maxlength="12" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="send">
+        <p id="nickHint" class="hint" hidden>Poné un nombre para el ranking.</p>
+        <button id="saveBtn" class="btn" type="submit">GUARDAR Y VER RANKING</button>
+        <p id="saveErr" class="err" hidden>No pudimos guardar tu score.</p>
+      </form>
+      <button class="btn big again" type="button">VOLVER A JUGAR</button>
+      <div id="overConsulta" style="width:100%"></div>
+    </div>
+  </div>
+
+  <div id="rank" class="screen">
+    <div class="box">
+      <h2>TOP 10</h2>
+      <ol id="rankList"></ol>
+      <p id="rankState" class="stat">CARGANDO…</p>
+      <button id="rankRetry" class="link" type="button" hidden>REINTENTAR</button>
+      <p id="rankMe" class="me-pos" hidden></p>
+      <p class="dare">¿PODÉS SUPERARLO?</p>
+      <button class="btn big again" type="button">VOLVER A JUGAR</button>
+      <div id="rankConsulta" style="width:100%"></div>
+      <p class="brand">LLEGASTE LEJOS. — <a href="https://avconsultora.marketing" target="_blank" rel="noopener">AV Marketing Integral</a></p>
+    </div>
+  </div>
+
+  <div id="consulta" hidden>
+    <button id="cBtn" class="btn outline" type="button">GANASTE UNA CONSULTA GRATIS</button>
+    <form id="cPanel" class="panel" hidden>
+      <h3>Consulta inicial gratis con AV</h3>
+      <p class="lead">Dejanos tu WhatsApp y te escribimos para coordinar.</p>
+      <label>WhatsApp<input id="cWa" type="tel" inputmode="tel" autocomplete="tel" value="+54 " maxlength="24"></label>
+      <label>Nombre (opcional)<input id="cName" type="text" autocomplete="given-name" maxlength="40"></label>
+      <button id="cSend" class="btn" type="submit">SOLICITAR</button>
+      <p id="cErr" class="err" hidden></p>
+      <p class="fine">Solo lo usamos para contactarte por esta consulta.</p>
+      <button id="cNo" class="link" type="button">Ahora no</button>
+    </form>
+    <div id="cDone" class="done" hidden><span class="wave-slot"></span>¡LISTO! TE ESCRIBIMOS PRONTO</div>
+    <p id="cAsked" class="asked" hidden>Consulta solicitada</p>
+  </div>
+
+  <button id="snd" type="button" aria-label="Prender sonido" aria-pressed="false"></button>
+</div>
+
+<div id="rotate"><div class="ph"></div>Girá el celu</div>
+
+<div id="display" hidden>
+  <div class="d-left">
+    <div class="d-head"><canvas id="dLogo"></canvas><h1>ELEVATOR AV</h1></div>
+    <h2>TOP 10</h2>
+    <ol id="dList"></ol>
+  </div>
+  <div class="d-right">
+    <canvas id="dQr"></canvas>
+    <div class="d-row"><span id="dChar"></span><p>ESCANEÁ Y<br>SUPERÁ AL #1</p></div>
+    <p class="brand">AV Marketing Integral · avconsultora.marketing</p>
+  </div>
+  <p id="dStatus" hidden>sin conexión</p>
+</div>
+
+<noscript><p style="padding:20px">Activá JavaScript para jugar.</p></noscript>
+<script type="module" src="game.js"></script>
+</body>
+</html>
