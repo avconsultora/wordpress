@@ -1,13 +1,13 @@
 // ELEVATOR AV — motor del juego.
 // Los números de gameplay viven en config.js (CONFIG).
-import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=6';
+import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=7';
 import {
   difficultyFor, evaluateStop, HIT, OVER, nextPhrase, wrapPhrase,
   cleanNickname, moderateNickname, normalizeWhatsapp, isValidWhatsapp,
-} from './logic.js?v=6';
-import * as S from './sprites.js?v=6';
-import * as sfx from './audio.js?v=6';
-import { submitScore, fetchRanking, submitLead, newGameId } from './ranking.js?v=6';
+} from './logic.js?v=7';
+import * as S from './sprites.js?v=7';
+import * as sfx from './audio.js?v=7';
+import { submitScore, fetchRanking, submitLead, newGameId } from './ranking.js?v=7';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -25,7 +25,7 @@ const KEY_PHRASES = 'eav_phrases';
 const $ = (id) => document.getElementById(id);
 
 if (params.get('display') === '1') {
-  import('./display.js?v=6');
+  import('./display.js?v=7');
 } else {
   boot();
 }
@@ -47,6 +47,7 @@ function boot() {
   let floorTpl = [];
   let lobbyTpl = null;
   let avTpl = [null, null];
+  let sign = null;
   const cabin = S.buildCabin();
   const doorPanel = S.buildAvDoorPanel();
   const digitsW = S.digitStrip('W');
@@ -70,6 +71,7 @@ function boot() {
     }
     lobbyTpl = S.buildFloorTemplate(W, 1, true);
     avTpl = [S.buildAvTemplate(W, 0), S.buildAvTemplate(W, 1)];
+    sign = S.buildMiradorSign(W);
     builtW = W;
   }
 
@@ -294,6 +296,9 @@ function boot() {
     let shake = 0;
     if (state === 'miss' && stateT < 320) shake = ((stateT / 40) | 0) & 1 ? 1 : -1;
     ctx.drawImage(cabin, cx - (S.CAB_W >> 1) + shake, cabTop);
+    // cartel miradorTEC en la vereda del primer piso, adelante del ascensor
+    const signY = ground - sign.canvas.height + 3;
+    if (signY < H && signY + sign.canvas.height > 0) ctx.drawImage(sign.canvas, sign.x, signY);
 
     if (state === 'hit' && stateT < 140) {
       ctx.fillStyle = S.PAL.A;
