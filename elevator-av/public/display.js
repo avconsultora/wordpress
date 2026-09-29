@@ -1,9 +1,9 @@
 // Vista de pantalla grande (?display=1): ranking + QR, se actualiza sola.
-import { GAME_URL, DISPLAY_REFRESH_MS } from './config.js?v=4';
-import { fetchRanking } from './ranking.js?v=4';
-import { qrCanvas } from './qr.js?v=4';
-import * as S from './sprites.js?v=4';
-import { renderRanking } from './game.js?v=4';
+import { GAME_URL, DISPLAY_REFRESH_MS } from './config.js?v=5';
+import { fetchRanking } from './ranking.js?v=5';
+import { qrCanvas } from './qr.js?v=5';
+import * as S from './sprites.js?v=5';
+import { renderRanking } from './game.js?v=5';
 
 const $ = (id) => document.getElementById(id);
 
@@ -19,12 +19,12 @@ qr.className = 'qr';
 $('dQr').replaceWith(qr);
 
 // personaje saludando al lado del QR
-const chars = [S.characterCanvases('Y'), S.characterCanvases('H')];
+const chars = S.officeCharacters();
 const slot = $('dChar');
 let f = 0, who = 0;
 setInterval(() => {
   f = (f + 1) % 8;
-  if (f === 0) who ^= 1;
+  if (f === 0) who = (who + 1) % chars.length;
   const set = chars[who];
   const img = f < 4 ? set.wave[f & 1] : set.idle[(f >> 1) & 1];
   slot.replaceChildren(img);

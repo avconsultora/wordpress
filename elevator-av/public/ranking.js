@@ -1,5 +1,5 @@
 // Ranking y leads contra Supabase (PostgREST directo, sin supabase-js).
-import { SUPABASE, EVENT_ID } from './config.js?v=4';
+import { SUPABASE, EVENT_ID } from './config.js?v=5';
 
 const TIMEOUT_MS = 8000;
 const MIN_GAP_MS = 5000; // 1 envío cada 5 s por cliente

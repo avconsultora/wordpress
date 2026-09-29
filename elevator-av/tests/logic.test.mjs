@@ -100,7 +100,9 @@ test('frases: todas entran en 2 líneas de 14 caracteres', () => {
 test('sprites: todas las filas tienen el mismo ancho', async () => {
   const S = await import('../public/sprites.js');
   const check = (name, rows, w) => rows.forEach((r, i) => assert.equal(r.length, w ?? rows[0].length, `${name} fila ${i}`));
-  for (const k of ['idle', 'wave']) S.CHAR_FRAMES[k].forEach((f, i) => { assert.equal(f.length, 24); check(`${k}${i}`, f, 16); });
+  for (const F of [S.CHAR_FRAMES, S.GIRL_FRAMES]) {
+    for (const k of ['idle', 'wave']) F[k].forEach((f, i) => { assert.equal(f.length, 24); check(`${k}${i}`, f, 16); });
+  }
   check('logo18', S.LOGO_18, 18);
   check('logo32', S.LOGO_32, 32);
   for (const k in S.ICONS) check(k, S.ICONS[k]);

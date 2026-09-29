@@ -13,7 +13,11 @@ export const PAL = {
   W: '#f2ead8',  // blanco hueso
   A: '#ff7a3d',  // acento cálido (éxito)
   S: '#eeb07f',  // piel
-  H: '#5a3220',  // pelo morocho
+  H: '#5a3220',  // pelo castaño (pasajero de la cabina)
+  HK: '#16141c', // pelo negro
+  R: '#7a1c38',  // rulos bordó
+  RL: '#b0385e', // brillo de los rulos
+  LB: '#d8405a', // labios
 };
 
 export const FH = 40;     // alto de un piso (px lógicos)
@@ -61,8 +65,8 @@ export const LOGO_32 = [
 const BODY = [
   '................',
   '.....hhhhhh.....',
-  '....hhhhhhhh....',
-  '...hhhhhhhhhh...',
+  '....hhgghhhh....',
+  '...hhghhhhhhh...',
   '...hhssssssh....',
   '...hsksssskh....',
   '....ssssssss....',
@@ -124,6 +128,66 @@ export const CHAR_FRAMES = {
       14: '..vvdvvvvvvd....',
       15: '..ssdvvvvvvd....',
       16: '..ss.vvvvvv.....',
+    }),
+  ],
+};
+
+// Chica con rulos (16×24): g = brillo del pelo, r = labios
+const GIRL = [
+  '.....hhhhhh.....',
+  '...hhghhhhghh...',
+  '..hhhhhhhhhhhh..',
+  '..hghhhhhhhhgh..',
+  '.hhhhssssssshhh.',
+  '.hghsksssskshgh.',
+  '.hhhsssssssshhh.',
+  '.hghsssrrssshgh.',
+  '.hhhhsssssshhh..',
+  '.hgh..ssss..hgh.',
+  '.hhhvvwwwwvvhhh.',
+  '..hvvvvwwvvvvh..',
+  '..vvvvvvvvvvvv..',
+  '..vvdvvvvvvdvv..',
+  '..vvdvvvvvvdvv..',
+  '..ssdvvvvvvdss..',
+  '..ss.vvvvvv.ss..',
+  '....vvvvvvvv....',
+  '...vvvvvvvvvv...',
+  '.....ss..ss.....',
+  '.....ss..ss.....',
+  '.....ss..ss.....',
+  '....kkk..kkk....',
+  '................',
+];
+
+const GIRL_ARM = {
+  10: '.hhhvvwwwwvvv...',
+  11: '..hvvvvwwvvvv...',
+  12: '..vvvvvvvvvvv...',
+  13: '..vvdvvvvvvd....',
+  14: '..vvdvvvvvvd....',
+  15: '..ssdvvvvvvd....',
+  16: '..ss.vvvvvv.....',
+};
+
+export const GIRL_FRAMES = {
+  idle: [GIRL, withRows(GIRL, { 5: '.hghsssssssshgh.' })],
+  wave: [
+    withRows(GIRL, {
+      ...GIRL_ARM,
+      6: '.hhhsssssssshss.',
+      7: '.hghsssrrssshss.',
+      8: '.hhhhsssssshhvv.',
+      9: '.hgh..ssss..vv..',
+    }),
+    withRows(GIRL, {
+      ...GIRL_ARM,
+      4: '.hhhhssssssshhss',
+      5: '.hghsksssskshss.',
+      6: '.hhhsssssssshvv.',
+      7: '.hghsssrrsssvv..',
+      8: '.hhhhssssssvv...',
+      9: '.hgh..ssss.vv...',
     }),
   ],
 };
@@ -224,12 +288,21 @@ export function logoCanvas(outline = true) {
   return c;
 }
 
-export function characterCanvases(hair) {
-  const map = { h: hair, s: 'S', k: 'K', v: 'V', d: 'VD', w: 'W', p: 'C1' };
+export function characterCanvases(hair, shine = hair, frames = CHAR_FRAMES) {
+  const map = { h: hair, g: shine, s: 'S', k: 'K', v: 'V', d: 'VD', w: 'W', p: 'C1', r: 'LB' };
   return {
-    idle: CHAR_FRAMES.idle.map((f) => spriteCanvas(f, map)),
-    wave: CHAR_FRAMES.wave.map((f) => spriteCanvas(f, map)),
+    idle: frames.idle.map((f) => spriteCanvas(f, map)),
+    wave: frames.wave.map((f) => spriteCanvas(f, map)),
   };
+}
+
+// Los tres personajes de la oficina AV, en el orden en que salen.
+export function officeCharacters() {
+  return [
+    characterCanvases('Y'),                   // rubio
+    characterCanvases('HK', 'C2'),            // morocho, pelo negro
+    characterCanvases('R', 'RL', GIRL_FRAMES), // chica con rulos bordó
+  ];
 }
 
 // ── Dígitos 3×5 para los carteles de piso ──────────────────────────────────

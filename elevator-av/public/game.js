@@ -1,13 +1,13 @@
 // ELEVATOR AV — motor del juego.
 // Los números de gameplay viven en config.js (CONFIG).
-import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=4';
+import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=5';
 import {
   difficultyFor, evaluateStop, HIT, OVER, nextPhrase, wrapPhrase,
   cleanNickname, moderateNickname, normalizeWhatsapp, isValidWhatsapp,
-} from './logic.js?v=4';
-import * as S from './sprites.js?v=4';
-import * as sfx from './audio.js?v=4';
-import { submitScore, fetchRanking, submitLead, newGameId } from './ranking.js?v=4';
+} from './logic.js?v=5';
+import * as S from './sprites.js?v=5';
+import * as sfx from './audio.js?v=5';
+import { submitScore, fetchRanking, submitLead, newGameId } from './ranking.js?v=5';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -25,7 +25,7 @@ const KEY_PHRASES = 'eav_phrases';
 const $ = (id) => document.getElementById(id);
 
 if (params.get('display') === '1') {
-  import('./display.js?v=4');
+  import('./display.js?v=5');
 } else {
   boot();
 }
@@ -50,7 +50,7 @@ function boot() {
   const cabin = S.buildCabin();
   const doorPanel = S.buildAvDoorPanel();
   const digitsW = S.digitStrip('W');
-  const chars = [S.characterCanvases('Y'), S.characterCanvases('H')];
+  const chars = S.officeCharacters();
   const NV = 8;
 
   // Chrome no re-resuelve la fuente si se asigna el mismo string: forzamos el cambio.
@@ -180,7 +180,7 @@ function boot() {
     office.floor = target;
     office.t = 0;
     office.active = true;
-    office.who = Math.random() < 0.5 ? 0 : 1;
+    office.who = (hits - 1) % chars.length; // un personaje distinto por piso, en orden
     office.lines = wrapPhrase(PHRASES[nextPhrase(phraseState, PHRASES.length)], 14);
     store.set(KEY_PHRASES, JSON.stringify(phraseState));
     if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) { /* */ } }
