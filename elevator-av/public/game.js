@@ -1,13 +1,13 @@
 // ELEVATOR AV — motor del juego.
 // Los números de gameplay viven en config.js (CONFIG).
-import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=5';
+import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=6';
 import {
   difficultyFor, evaluateStop, HIT, OVER, nextPhrase, wrapPhrase,
   cleanNickname, moderateNickname, normalizeWhatsapp, isValidWhatsapp,
-} from './logic.js?v=5';
-import * as S from './sprites.js?v=5';
-import * as sfx from './audio.js?v=5';
-import { submitScore, fetchRanking, submitLead, newGameId } from './ranking.js?v=5';
+} from './logic.js?v=6';
+import * as S from './sprites.js?v=6';
+import * as sfx from './audio.js?v=6';
+import { submitScore, fetchRanking, submitLead, newGameId } from './ranking.js?v=6';
 
 const params = new URLSearchParams(location.search);
 const DEBUG = params.get('debug') === '1';
@@ -25,7 +25,7 @@ const KEY_PHRASES = 'eav_phrases';
 const $ = (id) => document.getElementById(id);
 
 if (params.get('display') === '1') {
-  import('./display.js?v=5');
+  import('./display.js?v=6');
 } else {
   boot();
 }

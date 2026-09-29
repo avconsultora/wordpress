@@ -339,81 +339,128 @@ function rect(ctx, color, x, y, w, h) {
   ctx.fillRect(x, y, w, h);
 }
 
-function drawWindow(ctx, x, y, lit, r, theme) {
-  const glass = theme.av ? (lit ? 'VL' : 'VD') : (lit ? 'Y' : 'K');
-  rect(ctx, theme.frame, x - 1, y - 1, 16, 18);
-  rect(ctx, glass, x, y, 14, 16);
-  rect(ctx, theme.frame, x + 6, y, 2, 16);
-  rect(ctx, theme.frame, x, y + 7, 14, 1);
-  if (lit && !theme.av) {
-    // cortina / silueta
-    rect(ctx, 'A', x, y, 14, 2);
-    if (r() < 0.5) { rect(ctx, 'C2', x + 9, y + 9, 3, 7); rect(ctx, 'C2', x + 9, y + 7, 3, 2); }
-  } else if (!theme.av) {
-    ctx.fillStyle = PAL.W;
-    ctx.fillRect(x + 2 + Math.floor(r() * 3), y + 2 + Math.floor(r() * 3), 1, 1);
-    ctx.fillRect(x + 9 + Math.floor(r() * 3), y + 10 + Math.floor(r() * 4), 1, 1);
-    rect(ctx, 'C1', x + 1, y + 12, 2, 1);
-  }
-  rect(ctx, theme.sill, x - 1, y + 16, 16, 2);
+// ── Textos pixel dibujados a mano ──────────────────────────────────────────
+// miradorTEC: minúsculas geométricas finas, la pelotita rayada y TEC en mayúsculas (7 filas).
+const MT_GLYPHS = {
+  m: ['.......', '.......', '.##.##.', '#..#..#', '#..#..#', '#..#..#', '#..#..#'],
+  i: ['#', '.', '#', '#', '#', '#', '#'],
+  r: ['....', '....', '.###', '#...', '#...', '#...', '#...'],
+  a: ['.....', '.....', '.###.', '#...#', '#...#', '#...#', '.####'],
+  d: ['....#', '....#', '.####', '#...#', '#...#', '#...#', '.####'],
+  o: ['.....', '.....', '.###.', '#...#', '#...#', '#...#', '.###.'],
+  '°': ['.##.', '#.##', '##.#', '.##.', '....', '....', '....'],
+  T: ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
+  E: ['####', '#...', '#...', '###.', '#...', '#...', '####'],
+  C: ['.###', '#...', '#...', '#...', '#...', '#...', '.###'],
+};
+
+// Marketing: mismo trazo fino, con descendente para la g (9 filas).
+const MK_GLYPHS = {
+  M: ['#...#', '##.##', '#.#.#', '#...#', '#...#', '#...#', '#...#', '.....', '.....'],
+  a: ['.....', '.....', '.###.', '#...#', '#...#', '#...#', '.####', '.....', '.....'],
+  r: ['....', '....', '.###', '#...', '#...', '#...', '#...', '....', '....'],
+  k: ['#...', '#...', '#..#', '#.#.', '##..', '#.#.', '#..#', '....', '....'],
+  e: ['.....', '.....', '.###.', '#...#', '#####', '#....', '.###.', '.....', '.....'],
+  t: ['.#.', '.#.', '###', '.#.', '.#.', '.#.', '..#', '...', '...'],
+  i: ['#', '.', '#', '#', '#', '#', '#', '.', '.'],
+  n: ['....', '....', '###.', '#..#', '#..#', '#..#', '#..#', '....', '....'],
+  g: ['.....', '.....', '.####', '#...#', '#...#', '#...#', '.####', '....#', '.###.'],
+};
+
+function composeText(glyphs, text) {
+  const chars = Array.from(text);
+  const h = glyphs[chars[0]].length;
+  const rows = [];
+  for (let y = 0; y < h; y++) rows.push(chars.map((ch) => glyphs[ch][y]).join('.'));
+  return rows;
 }
 
-function drawDoor(ctx, x, y, theme) {
-  rect(ctx, theme.frame, x - 1, y - 1, 14, 25);
-  rect(ctx, theme.door, x, y, 12, 24);
-  rect(ctx, theme.frame, x + 2, y + 3, 8, 7);
-  rect(ctx, theme.door2, x + 3, y + 4, 6, 5);
-  rect(ctx, 'Y', x + 9, y + 13, 2, 2);
-}
+export const MIRADORTEC = composeText(MT_GLYPHS, 'mirador°TEC');
+export const MARKETING = composeText(MK_GLYPHS, 'Marketing');
 
-function drawPainting(ctx, x, y, r) {
-  rect(ctx, 'Y', x, y, 12, 9);
-  rect(ctx, 'K', x + 1, y + 1, 10, 7);
-  const c = r() < 0.5 ? 'A' : 'VL';
-  rect(ctx, c, x + 2, y + 5, 8, 2);
-  rect(ctx, 'W', x + 7, y + 2, 2, 2);
-}
-
-function drawStairs(ctx, x, y, w, theme) {
-  // escalera de fondo en diagonal, estilo Elevator Action
-  const steps = Math.floor(w / 4);
-  for (let i = 0; i < steps; i++) {
-    rect(ctx, theme.stair, x + i * 4, y + FH - SLAB - 4 - Math.round(i * 4 * ((FH - SLAB - 10) / w)), 5, 2);
-  }
-  rect(ctx, theme.stairRail, x, y + 6, 1, FH - SLAB - 6);
-}
-
-function drawLamp(ctx, x, y, theme) {
-  rect(ctx, theme.frame, x, y, 4, 2);
-  rect(ctx, 'Y', x + 1, y + 2, 2, 2);
-}
-
+// ── Edificio (estilo fachada miradorTEC: marco de hormigón + paños de vidrio) ──
 const GRAY = {
-  wall: 'C2', wall2: 'C1', trim: 'C3', frame: 'C1', sill: 'C3', door: 'C1', door2: 'C2',
-  slabTop: 'C3', slab: 'C1', stair: 'C1', stairRail: 'C1', brick: 'C1', brick2: 'K', av: false,
+  wall: 'C2', beam: 'C3', beamShade: 'C1', col: 'C3', colShade: 'C2', frame: 'C1',
+  slabTop: 'C3', slab: 'C1', glassDark: 'K', glassLit: 'C1', mullion: 'C2', light: 'Y',
+  person: 'C2', brace: 'C3', av: false,
 };
 const PURPLE = {
-  wall: 'V', wall2: 'VD', trim: 'VL', frame: 'VD', sill: 'VL', door: 'VD', door2: 'V',
-  slabTop: 'VL', slab: 'VD', stair: 'VD', stairRail: 'VD', brick: 'VD', brick2: 'K', av: true,
+  wall: 'V', beam: 'VD', beamShade: 'K', col: 'VD', colShade: 'K', frame: 'VD',
+  slabTop: 'VL', slab: 'VD', glassDark: 'VD', glassLit: 'VL', mullion: 'V', light: 'W',
+  person: 'V', brace: 'VD', av: true,
 };
+
+function drawColumn(ctx, x, theme, w = 4) {
+  rect(ctx, theme.col, x, 0, w, FH - SLAB);
+  rect(ctx, theme.colShade, x + w - 1, 4, 1, FH - SLAB - 4);
+}
+
+// Paño de vidrio entre columnas, con parantes finos y luces de techo.
+function drawGlassBay(ctx, x0, x1, lit, r, theme, extras = true) {
+  const y0 = 4, y1 = FH - SLAB;
+  const w = x1 - x0;
+  if (w < 6) return;
+  if (lit === 2) {
+    // oficina bien iluminada: vidrio cálido con parantes oscuros y alguien adentro
+    rect(ctx, 'Y', x0, y0, w, y1 - y0);
+    rect(ctx, 'W', x0, y0, w, 1);
+    for (let x = x0 + 6 + Math.floor(r() * 3); x < x1 - 2; x += 7) rect(ctx, 'C1', x, y0, 1, y1 - y0);
+    rect(ctx, 'C1', x0, y0 + 7, w, 1);
+    if (r() < 0.6) {
+      const px = x0 + 3 + Math.floor(r() * Math.max(1, w - 8));
+      rect(ctx, 'C1', px, y1 - 11, 3, 3);
+      rect(ctx, 'C1', px - 1, y1 - 8, 5, 5);
+      rect(ctx, 'C1', px, y1 - 3, 1, 3);
+      rect(ctx, 'C1', px + 2, y1 - 3, 1, 3);
+    }
+    return;
+  }
+  rect(ctx, lit ? theme.glassLit : theme.glassDark, x0, y0, w, y1 - y0);
+  if (lit) {
+    // luces rectangulares del techo, como en la foto
+    for (let x = x0 + 2 + Math.floor(r() * 3); x + 3 < x1; x += 8) rect(ctx, theme.light, x, y0 + 2, 3, 1);
+  } else {
+    // reflejo en el vidrio oscuro
+    const rx = x0 + 2 + Math.floor(r() * Math.max(1, w - 8));
+    rect(ctx, theme.mullion, rx, y0 + 6, 1, 1);
+    rect(ctx, theme.mullion, rx + 1, y0 + 5, 1, 1);
+  }
+  if (extras) {
+    const pick = r();
+    if (pick < 0.22 && w > 14) {
+      // diagonal de estructura
+      const len = Math.min(w - 2, y1 - y0 - 2);
+      for (let i = 0; i < len; i++) rect(ctx, theme.brace, x0 + 1 + i, y0 + 1 + Math.round(i * (y1 - y0 - 3) / len), 2, 1);
+    } else if (pick < 0.55 && lit) {
+      // alguien adentro
+      const px = x0 + 3 + Math.floor(r() * Math.max(1, w - 8));
+      rect(ctx, theme.person, px, y1 - 11, 3, 3);
+      rect(ctx, theme.person, px - 1, y1 - 8, 5, 5);
+      rect(ctx, theme.person, px, y1 - 3, 1, 3);
+      rect(ctx, theme.person, px + 2, y1 - 3, 1, 3);
+    } else if (pick < 0.72 && w > 18) {
+      // escalera de fondo
+      for (let i = 0; i * 4 < w - 4; i++) rect(ctx, theme.mullion, x0 + 2 + i * 4, y1 - 4 - i * 4, 5, 1);
+    }
+  }
+  // parantes verticales y travesaños
+  for (let x = x0 + 7 + Math.floor(r() * 3); x < x1 - 2; x += 8) rect(ctx, theme.mullion, x, y0, 1, y1 - y0);
+  rect(ctx, theme.mullion, x0, y0 + 7, w, 1);
+  rect(ctx, theme.mullion, x0, y1 - 6, w, 1);
+}
 
 function drawFloorBase(ctx, W, theme) {
   const cx = W >> 1;
   const sl = cx - (SHAFT_W >> 1), sr = cx + (SHAFT_W >> 1);
   rect(ctx, theme.wall, 0, 0, W, FH);
-  // techo y zócalo
-  rect(ctx, theme.wall2, 0, 0, W, 2);
-  rect(ctx, theme.trim, 0, 2, W, 1);
-  rect(ctx, theme.wall2, 0, FH - SLAB - 6, W, 6);
-  rect(ctx, theme.trim, 0, FH - SLAB - 7, W, 1);
-  // losa
+  // viga de hormigón (techo) y losa
+  rect(ctx, theme.beam, 0, 0, W, 3);
+  rect(ctx, theme.beamShade, 0, 3, W, 1);
   rect(ctx, theme.slab, 0, FH - SLAB, W, SLAB);
   rect(ctx, theme.slabTop, 0, FH - SLAB, W, 1);
-  // muros exteriores de ladrillo
-  for (const bx of [0, W - 4]) {
-    rect(ctx, theme.brick, bx, 0, 4, FH);
-    for (let by = 0; by < FH; by += 4) rect(ctx, theme.brick2, bx + ((by >> 2) & 1) * 2, by, 1, 1);
-  }
+  // columnas del marco exterior
+  drawColumn(ctx, 0, theme, 5);
+  drawColumn(ctx, W - 5, theme, 5);
   // hueco del ascensor
   rect(ctx, 'K', sl, 0, SHAFT_W, FH);
   rect(ctx, 'C1', sl + 1, 0, 2, FH);
@@ -424,48 +471,61 @@ function drawFloorBase(ctx, W, theme) {
   return { sl, sr };
 }
 
-// Plantilla de un piso gris. `seed` define qué objetos aparecen.
+// Divide una zona en paños separados por una columna central.
+function drawZone(ctx, x0, x1, r, theme) {
+  const mid = x0 + (((x1 - x0) / 2) | 0) - 2;
+  const pick = () => { const v = r(); return v < 0.22 ? 2 : v < 0.65 ? 1 : 0; };
+  drawGlassBay(ctx, x0, mid, pick(), r, theme);
+  drawGlassBay(ctx, mid + 4, x1, pick(), r, theme);
+  drawColumn(ctx, mid, theme);
+}
+
+// Planta baja abierta sobre columnas, con el cartel miradorTEC.
+function drawLobby(ctx, W, sl, sr, r) {
+  const y1 = FH - SLAB;
+  // interior en sombra bajo el edificio, con luces en el techo
+  rect(ctx, 'C1', 5, 4, sl - 7, y1 - 4);
+  rect(ctx, 'C1', sr + 2, 4, W - sr - 7, y1 - 4);
+  for (let x = 7; x < W - 6; x += 6) if (x < sl - 3 || x > sr + 2) rect(ctx, 'Y', x, 5, 2, 1);
+  // entrada vidriada al fondo (derecha)
+  const gx = sr + 6, gw = W - 5 - 4 - gx;
+  rect(ctx, 'Y', gx, 12, gw, y1 - 12);
+  for (let x = gx + 5; x < gx + gw; x += 6) rect(ctx, 'C1', x, 12, 1, y1 - 12);
+  rect(ctx, 'C1', gx, 12, gw, 1);
+  rect(ctx, 'K', gx + 8, y1 - 9, 2, 2);
+  rect(ctx, 'K', gx + 7, y1 - 7, 4, 7);
+  // brillo cálido en el piso
+  for (let x = gx; x < gx + gw; x += 3) rect(ctx, 'A', x, y1 - 1, 1, 1);
+  // pilotes
+  drawColumn(ctx, sr + 2, GRAY);
+  drawColumn(ctx, W - 5 - 4 - 1, GRAY);
+  drawColumn(ctx, 5 + (((sl - 7) / 2) | 0), GRAY);
+  // cartel de hormigón con el logo miradorTEC
+  const lw = MIRADORTEC[0].length;
+  const bw = lw + 6, bh = MIRADORTEC.length + 6;
+  const bx = Math.max(1, Math.min(6, sl - 3 - bw));
+  const by = y1 - bh;
+  rect(ctx, 'C3', bx, by, bw, bh);
+  rect(ctx, 'C2', bx + 1, by + 1, bw - 2, bh - 2);
+  rect(ctx, 'C1', bx, by + bh - 1, bw, 1);
+  paint(ctx, MIRADORTEC, bx + 3, by + 3, { '#': 'W' });
+  // luz que baña el cartel
+  rect(ctx, 'Y', bx + 4, by - 1, 2, 1);
+  rect(ctx, 'Y', bx + bw - 6, by - 1, 2, 1);
+}
+
+// Plantilla de un piso gris. `seed` define qué aparece en cada paño.
 export function buildFloorTemplate(W, seed, lobby = false) {
   const c = makeCanvas(W, FH);
   const ctx = c.getContext('2d');
   const r = rng(seed * 7919 + 13);
   const { sl, sr } = drawFloorBase(ctx, W, GRAY);
-  const zones = [[6, sl - 19], [sr + 4, W - 6]];
-  const top = 8;
-  for (let z = 0; z < 2; z++) {
-    let [x0, x1] = zones[z];
-    if (lobby) {
-      // puerta de vidrio doble
-      const dx = z === 0 ? x0 + 10 : x1 - 34;
-      rect(ctx, 'C1', dx - 1, top - 1, 26, 30);
-      rect(ctx, 'Y', dx, top, 24, 29);
-      rect(ctx, 'C1', dx + 11, top, 2, 29);
-      rect(ctx, 'W', dx + 2, top + 2, 1, 6);
-      rect(ctx, 'W', dx + 15, top + 2, 1, 6);
-      continue;
-    }
-    let x = x0 + Math.floor(r() * 4);
-    while (x < x1 - 14) {
-      const room = x1 - x;
-      const pick = r();
-      if (pick < 0.38 && room >= 16) {
-        drawWindow(ctx, x + 1, top + 2, r() < 0.55, r, GRAY);
-        x += 18 + Math.floor(r() * 5);
-      } else if (pick < 0.62 && room >= 14) {
-        drawDoor(ctx, x + 1, FH - SLAB - 25, GRAY);
-        x += 16 + Math.floor(r() * 5);
-      } else if (pick < 0.75 && room >= 24) {
-        drawStairs(ctx, x, 0, 24, GRAY);
-        x += 26;
-      } else if (pick < 0.88 && room >= 13) {
-        drawPainting(ctx, x + 1, top + 5, r);
-        x += 15;
-      } else {
-        drawLamp(ctx, x + 2, top - 3, GRAY);
-        x += 8 + Math.floor(r() * 6);
-      }
-    }
+  if (lobby) {
+    drawLobby(ctx, W, sl, sr, r);
+    return c;
   }
+  drawZone(ctx, 5, sl - 2, r, GRAY);
+  drawZone(ctx, sr + 2, W - 5, r, GRAY);
   return c;
 }
 
@@ -489,26 +549,28 @@ export function buildAvTemplate(W, phase) {
   const ctx = c.getContext('2d');
   const { sl, sr } = drawFloorBase(ctx, W, PURPLE);
   const glow = phase ? 'W' : 'VL';
-  // bandas de luz
-  rect(ctx, glow, 0, 2, W, 1);
-  rect(ctx, glow, 0, FH - SLAB, W, 1);
-  // ventanas violetas encendidas a la izquierda
   const r = rng(99);
-  let x = 8;
-  while (x + 16 < sl - 26) { drawWindow(ctx, x, 10, true, r, { ...PURPLE, frame: 'VD' }); x += 22; }
-  // logo grande en la pared izquierda, cerca del hueco
-  paint(ctx, LOGO_18, sl - 22, 20, { '#': phase ? 'W' : 'VL' });
+  // bandas de luz
+  rect(ctx, glow, 0, 3, W, 1);
+  rect(ctx, glow, 0, FH - SLAB, W, 1);
+  // izquierda: paño de vidrio encendido + pared con "Marketing" en blanco
+  const mw = MARKETING[0].length;
+  const tx = sl - 5 - mw;
+  drawGlassBay(ctx, 5, tx - 5, true, r, PURPLE, false);
+  drawColumn(ctx, tx - 5, PURPLE);
+  paint(ctx, MARKETING, tx, 15, { '#': 'W' });
   // marco de la puerta de la oficina (la hoja se dibuja aparte, animada)
   const dx = avDoorX(W);
   rect(ctx, 'VD', dx - 2, FH - SLAB - AV_DOOR_H - 2, AV_DOOR_W + 4, AV_DOOR_H + 2);
   rect(ctx, 'K', dx, FH - SLAB - AV_DOOR_H, AV_DOOR_W, AV_DOOR_H);
   // cartel luminoso arriba de la puerta
-  rect(ctx, phase ? 'A' : 'Y', dx + 4, 3, AV_DOOR_W - 8, 2);
+  rect(ctx, phase ? 'A' : 'Y', dx + 4, 4, AV_DOOR_W - 8, 2);
   // lámparas de parada
   rect(ctx, phase ? 'A' : 'Y', sl - 5, FH - SLAB - 5, 3, 3);
   rect(ctx, phase ? 'A' : 'Y', sr + 2, FH - SLAB - 5, 3, 3);
-  // piso a la derecha después de la puerta: ventana
-  if (W - (dx + AV_DOOR_W) > 22) drawWindow(ctx, dx + AV_DOOR_W + 5, 10, true, r, PURPLE);
+  // derecha de la puerta: paño de vidrio violeta
+  const gx = dx + AV_DOOR_W + 4;
+  if (W - 5 - gx > 8) { drawColumn(ctx, gx - 2, PURPLE, 2); drawGlassBay(ctx, gx, W - 5, true, r, PURPLE, false); }
   return c;
 }
 
