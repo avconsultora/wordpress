@@ -1,16 +1,18 @@
 // ELEVATOR AV — motor del juego.
 // Los números de gameplay viven en config.js (CONFIG).
-import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=7';
+import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=8';
 import {
   difficultyFor, evaluateStop, HIT, OVER, nextPhrase, wrapPhrase,
   cleanNickname, moderateNickname, normalizeWhatsapp, isValidWhatsapp,
-} from './logic.js?v=7';
-import * as S from './sprites.js?v=7';
-import * as sfx from './audio.js?v=7';
-import { submitScore, fetchRanking, submitLead, newGameId } from './ranking.js?v=7';
+} from './logic.js?v=8';
+import * as S from './sprites.js?v=8';
+import * as sfx from './audio.js?v=8';
+import { submitScore, fetchRanking, submitLead, startServerGame } from './ranking.js?v=8';
 
 const params = new URLSearchParams(location.search);
-const DEBUG = params.get('debug') === '1';
+// El modo debug solo funciona si config.js lo habilita (debugEnabled: true).
+// En producción queda apagado: ?debug=1 no hace nada y no se expone nada en la consola.
+const DEBUG = CONFIG.debugEnabled === true && params.get('debug') === '1';
 
 // ── Almacenamiento local seguro ─────────────────────────────────────────────
 const store = {
@@ -25,7 +27,7 @@ const KEY_PHRASES = 'eav_phrases';
 const $ = (id) => document.getElementById(id);
 
 if (params.get('display') === '1') {
-  import('./display.js?v=7');
+  import('./display.js?v=8');
 } else {
   boot();
 }
@@ -119,7 +121,7 @@ function boot() {
   let pos = 1, target = 0, speed = 0, tol = 0, hits = 0, floorBase = 1;
   let stateT = 0, hitFrom = 0, missKind = 0;
   let lastT = 0, acceptAfter = 0, clock = 0;
-  let gameId = '', gameStart = 0, durationMs = 0, maxFloor = 1;
+  let gameId = null, gameToken = 0, gameStart = 0, durationMs = 0, maxFloor = 1;
   const diff = {};
   // bolsa de frases, guardada para que tampoco se repitan entre partidas
   const phraseState = { bag: [], last: -1 };
@@ -137,7 +139,9 @@ function boot() {
 
   function startGame() {
     hits = 0; pos = 1; floorBase = 1;
-    gameId = newGameId();
+    gameId = null;
+    const token = ++gameToken;
+    startServerGame().then((id) => { if (token === gameToken) gameId = id; });
     gameStart = performance.now();
     pausedMs = 0;
     office.active = false; office.floor = -1; prevAvFloor = -1;

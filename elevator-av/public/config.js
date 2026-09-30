@@ -20,6 +20,7 @@ export const CONFIG = {
   roundTransitionMs: 1100,// pausa de festejo entre rondas
   missRevealMs: 750,      // cuánto se ve el error antes de la pantalla de game over
   consultaMinScore: 1,    // aciertos para ganar la consulta gratis (0 = siempre)
+  debugEnabled: false,    // true solo para calibrar en tu compu: habilita ?debug=1
 };
 
 // ── Evento y ranking ───────────────────────────────────────────────────────

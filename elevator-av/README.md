@@ -186,11 +186,27 @@ La velocidad llega al tope de 9 pisos/s alrededor del acierto 20.
 
 ### Modo debug
 
-`?debug=1` muestra la posición exacta, el objetivo, la tolerancia, la velocidad, la diferencia al frenar, los FPS y la banda de tolerancia en naranja. Sirve para calibrar.
+Poné `debugEnabled: true` en `config.js` (solo en tu compu, **nunca en el hosting**) y abrí con `?debug=1`. Muestra la posición exacta, el objetivo, la tolerancia, la velocidad, la diferencia al frenar, los FPS y la banda de tolerancia en naranja. Sirve para calibrar.
 
 ---
 
-## 7. Desarrollo
+## 7. Anti-trampa
+
+- El servidor anota cuándo empieza cada partida (`start_game`) y mide él la duración al guardar. La duración que manda el celular se ignora.
+- El piso alcanzado tiene que ser coherente con los aciertos.
+- Una partida solo se puede guardar una vez.
+- El modo debug está apagado en producción.
+
+Si en un ranking ya existente aparece un score raro:
+
+```sql
+select nickname, score, max_floor, duration_ms, created_at
+from scores where event_id = 'evento-2026' order by score desc limit 20;
+```
+
+Una partida real de N aciertos dura unos 2,2 s por acierto; por ejemplo, 135 aciertos llegan al piso 1211–1301 en unos 5 minutos. Un juego del lado del navegador nunca es 100% inviolable: si aparece algo imposible, se borra en 30 segundos (sección 5).
+
+## 8. Desarrollo
 
 ```bash
 node --test tests/*.test.mjs        # lógica, dificultad, moderación, WhatsApp, sprites

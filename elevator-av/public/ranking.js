@@ -1,5 +1,5 @@
 // Ranking y leads contra Supabase (PostgREST directo, sin supabase-js).
-import { SUPABASE, EVENT_ID } from './config.js?v=7';
+import { SUPABASE, EVENT_ID } from './config.js?v=8';
 
 const TIMEOUT_MS = 8000;
 const MIN_GAP_MS = 5000; // 1 envío cada 5 s por cliente
@@ -25,16 +25,24 @@ async function call(path, body, extraHeaders) {
   }
 }
 
-export function newGameId() {
-  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-  const b = new Uint8Array(16);
-  crypto.getRandomValues(b);
-  b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
-  const h = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+// Pide al servidor un id de partida: el servidor anota cuándo empezó y mide
+// la duración real al guardar. Reintenta un par de veces si falla la red.
+export async function startServerGame(tries = 3) {
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await call('/rest/v1/rpc/start_game', { p_event_id: EVENT_ID });
+      if (res.ok) {
+        const id = await res.json();
+        if (typeof id === 'string') return id;
+      }
+    } catch (e) { /* reintentar */ }
+    await new Promise((r) => setTimeout(r, 1500 * (i + 1)));
+  }
+  return null;
 }
 
 export async function submitScore({ gameId, nickname, score, maxFloor, durationMs }) {
+  if (!gameId) throw new Error('sin partida del servidor');
   const wait = lastSubmitAt + MIN_GAP_MS - Date.now();
   if (wait > 0) await new Promise((r) => setTimeout(r, wait));
   lastSubmitAt = Date.now();
