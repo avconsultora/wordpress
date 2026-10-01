@@ -1,15 +1,18 @@
 // ELEVATOR AV — animación para la tele del evento (1920×1080, loop perfecto).
 // Se dibuja a 480×270 y se escala ×4 para que quede pixel perfecto.
 // Abrir tv.html en pantalla completa, o grabarla con ?record=1 (renderAt(t)).
-import * as S from './sprites.js?v=10';
-import { qrCanvas } from './qr.js?v=10';
+import * as S from './sprites.js?v=11';
+import { qrCanvas } from './qr.js?v=11';
 
 const QR_URL = 'https://avconsultora.marketing/sc26/';
 const LW = 480, LH = 270, SCALE = 4;
-// Duración del loop: múltiplo exacto de todos los ciclos (1.8 s, 1.2 s, 0.6 s,
-// 0.4 s) y de los 21 pisos que sube el fondo, así no se nota el corte.
-export const LOOP_S = 36;
-const FLOORS_PER_LOOP = 21;
+// Duración del loop (?loop=36 o ?loop=60; por defecto 60): múltiplo exacto de
+// todos los ciclos (2 s, 1.2 s, 0.6 s, 0.4 s) y el fondo sube un múltiplo de
+// 21 pisos (7 plantillas × 3 personajes), así no se nota el corte.
+const loopParam = parseInt(new URLSearchParams(location.search).get('loop'), 10);
+export const LOOP_S = loopParam > 0 && loopParam % 6 === 0 ? loopParam : 60;
+const FLOORS_PER_LOOP = 21 * Math.max(1, Math.round(LOOP_S / 36));
+const HOP_S = 2;
 const TOWER_W = 160, TOWERS = 3;
 const FH = S.FH, SLAB = S.SLAB;
 const BASE = Math.round(LH * 0.72);
@@ -100,14 +103,14 @@ function text(str, x, y, size, color, align = 'left', shadow = null) {
 function phase(t, period) { return mod(t, period) / period; }
 
 function hopOffset(t) {
-  const p = phase(t, 1.8);
+  const p = phase(t, HOP_S);
   if (p >= 0.66 && p < 0.72) return -2;
   if (p >= 0.78 && p < 0.84) return -1;
   return 0;
 }
 
 function wiggleAngle(t) {
-  const p = phase(t, 1.8);
+  const p = phase(t, HOP_S);
   if (p >= 0.64 && p < 0.70) return -12;
   if (p >= 0.70 && p < 0.76) return 12;
   if (p >= 0.76 && p < 0.82) return -8;
