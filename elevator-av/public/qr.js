@@ -215,10 +215,10 @@ export function qrMatrix(text) {
   return mod;
 }
 
-// Dibuja el QR en un canvas nuevo, con 4 módulos de margen.
-export function qrCanvas(text, scale = 8, dark = '#0b0a10', light = '#f2ead8') {
+// Dibuja el QR en un canvas nuevo, con `margin` módulos de margen claro (4 por defecto).
+export function qrCanvas(text, scale = 8, dark = '#0b0a10', light = '#f2ead8', margin = 4) {
   const m = qrMatrix(text);
-  const n = m.length + 8;
+  const n = m.length + margin * 2;
   const c = document.createElement('canvas');
   c.width = c.height = n * scale;
   const ctx = c.getContext('2d');
@@ -226,7 +226,7 @@ export function qrCanvas(text, scale = 8, dark = '#0b0a10', light = '#f2ead8') {
   ctx.fillRect(0, 0, c.width, c.height);
   ctx.fillStyle = dark;
   for (let y = 0; y < m.length; y++) for (let x = 0; x < m.length; x++) {
-    if (m[y][x]) ctx.fillRect((x + 4) * scale, (y + 4) * scale, scale, scale);
+    if (m[y][x]) ctx.fillRect((x + margin) * scale, (y + margin) * scale, scale, scale);
   }
   return c;
 }

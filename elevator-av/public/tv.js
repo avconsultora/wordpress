@@ -1,8 +1,8 @@
 // ELEVATOR AV — animación para la tele del evento (1920×1080, loop perfecto).
 // Se dibuja a 480×270 y se escala ×4 para que quede pixel perfecto.
 // Abrir tv.html en pantalla completa, o grabarla con ?record=1 (renderAt(t)).
-import * as S from './sprites.js?v=9';
-import { qrCanvas } from './qr.js?v=9';
+import * as S from './sprites.js?v=10';
+import { qrCanvas } from './qr.js?v=10';
 
 const QR_URL = 'https://avconsultora.marketing/sc26/';
 const LW = 480, LH = 270, SCALE = 4;
@@ -20,8 +20,15 @@ screen.height = LH * SCALE;
 const sctx = screen.getContext('2d');
 sctx.imageSmoothingEnabled = false;
 const buf = S.makeCanvas(LW, LH);
-const ctx = buf.getContext('2d');
-ctx.imageSmoothingEnabled = false;
+const bctx = buf.getContext('2d');
+bctx.imageSmoothingEnabled = false;
+// El contenido va en una capa más fina (960×540, ×2) para poder usar tamaños
+// intermedios y dejar aire sin que nada se vea exagerado.
+const UW = LW * 2, UH = LH * 2;
+const ubuf = S.makeCanvas(UW, UH);
+const uctx = ubuf.getContext('2d');
+uctx.imageSmoothingEnabled = false;
+let ctx = bctx;
 
 // ── gráficos pre-renderizados ──────────────────────────────────────────────
 const tpl = [];
@@ -32,7 +39,7 @@ const doorPanel = S.buildAvDoorPanel();
 const chars = S.officeCharacters();
 const logo = S.logoCanvas();
 const gift = S.iconCanvas('gift', true);
-const qr = qrCanvas(QR_URL, 3, S.PAL.K, S.PAL.W); // 3 px lógicos por módulo (12 px en la tele)
+const qr = qrCanvas(QR_URL, 6, S.PAL.K, S.PAL.W, 2); // 6 px de la capa = 12 px en la tele; margen de 2 módulos
 const qrSize = qr.width;
 
 const mod = (a, b) => ((a % b) + b) % b;
@@ -121,7 +128,7 @@ function sparkle(t, x, y, delay) {
 function drawButton(t, cx, top) {
   const label = 'JUGÁ Y GANÁ';
   const tw = Array.from(label).length * 16;
-  const w = tw + 18 + 8 + 30, h = 38;
+  const w = tw + 18 + 8 + 34, h = 42;
   const x = Math.round(cx - w / 2);
   const y = top + hopOffset(t);
   const ring = phase(t, 0.6) < 0.5 ? S.PAL.W : S.PAL.Y;
@@ -131,48 +138,65 @@ function drawButton(t, cx, top) {
   ctx.fillStyle = '#ffc09a'; ctx.fillRect(x, y, w, 2); ctx.fillRect(x, y, 2, h);
   ctx.fillStyle = '#b8481a'; ctx.fillRect(x, y + h - 2, w, 2); ctx.fillRect(x + w - 2, y, 2, h);
   // regalo que se sacude
-  const gx = x + 15, gy = y + ((h - 18) >> 1);
+  const gx = x + 17, gy = y + ((h - 18) >> 1);
   const ang = wiggleAngle(t);
   ctx.save();
   ctx.translate(gx + 9, gy + 9);
   if (ang) ctx.rotate((ang * Math.PI) / 180);
   ctx.drawImage(gift, -9, -9, 18, 18);
   ctx.restore();
-  text(label, gx + 18 + 8, y + 11, 16, S.PAL.K);
+  // La fuente aplasta el acento de la Á mayúscula; se escribe la A sola
+  // y el acento se dibuja a mano arriba, en el margen del botón.
+  const lx = gx + 18 + 8, ly = y + 13;
+  text(label.replace(/Á/g, 'A'), lx, ly, 16, S.PAL.K);
+  Array.from(label).forEach((ch, i) => {
+    if (ch !== 'Á') return;
+    const ax = lx + i * 16;
+    ctx.fillStyle = S.PAL.K;
+    ctx.fillRect(ax + 8, ly - 8, 4, 2);
+    ctx.fillRect(ax + 6, ly - 6, 4, 2);
+  });
   // destellos en esquinas opuestas
   sparkle(t, x - 9, y - 9, 0);
   sparkle(t, x + w + 5, y + h + 5, 0.6);
 }
 
-// ── composición ────────────────────────────────────────────────────────────
+// ── composición (coordenadas de la capa 960×540) ───────────────────────────
+// Dos columnas centradas verticalmente, con márgenes amplios alrededor.
 function drawUI(t) {
-  // columna izquierda: título, logo, consigna, botón
-  const lc = 150;
-  text('ELEVATOR', lc, 22, 24, S.PAL.W, 'center', [[4, S.PAL.VD], [2, S.PAL.V]]);
-  const lw = logo.width * 4, lh = logo.height * 4;
-  ctx.drawImage(logo, Math.round(lc - lw / 2), 56, lw, lh);
-  text('Frená el ascensor', lc, 146, 8, S.PAL.W, 'center', [[1, S.PAL.K]]);
-  text('en el piso AV.', lc, 158, 8, S.PAL.W, 'center', [[1, S.PAL.K]]);
-  drawButton(t, lc, 184);
-  text('una consulta gratis con AV', lc, 236, 8, S.PAL.VL, 'center', [[1, S.PAL.K]]);
+  ctx = uctx;
+  ctx.clearRect(0, 0, UW, UH);
 
-  // columna derecha: QR con marco violeta
-  const qx = 390 - (qrSize >> 1), qy = 34;
-  ctx.fillStyle = S.PAL.V; ctx.fillRect(qx - 4, qy - 4, qrSize + 8, qrSize + 8);
-  ctx.fillStyle = S.PAL.VL; ctx.fillRect(qx - 4, qy - 4, qrSize + 8, 1);
+  // izquierda: ELEVATOR + logo AV
+  const lc = Math.round(UW * 0.31);
+  const titleH = 32, gapL = 28;
+  const lw = logo.width * 6, lh = logo.height * 6;
+  const leftH = titleH + gapL + lh;
+  const ly = Math.round((UH - leftH) / 2);
+  text('ELEVATOR', lc, ly, 32, S.PAL.W, 'center', [[4, S.PAL.VD], [2, S.PAL.V]]);
+  ctx.drawImage(logo, Math.round(lc - lw / 2), ly + titleH + gapL, lw, lh);
+
+  // derecha: QR + botón JUGÁ Y GANÁ
+  const rc = Math.round(UW * 0.69);
+  const frame = 6, gapR = 34, btnH = 42;
+  const qBox = qrSize + frame * 2;
+  const rightH = qBox + gapR + btnH;
+  const ry = Math.round((UH - rightH) / 2);
+  const qx = Math.round(rc - qrSize / 2), qy = ry + frame;
+  ctx.fillStyle = S.PAL.V; ctx.fillRect(qx - frame, qy - frame, qBox, qBox);
+  ctx.fillStyle = S.PAL.VL; ctx.fillRect(qx - frame, qy - frame, qBox, 2);
+  ctx.fillStyle = S.PAL.VD; ctx.fillRect(qx - frame, qy + qrSize + frame - 2, qBox, 2);
   ctx.drawImage(qr, qx, qy);
-  const qc = qx + qrSize / 2;
-  text('ESCANEÁ', qc, qy + qrSize + 14, 16, S.PAL.Y, 'center', [[2, S.PAL.VD]]);
-  text('y jugá desde tu celu', qc, qy + qrSize + 38, 8, S.PAL.W, 'center', [[1, S.PAL.K]]);
-
-  text('AV Marketing Integral · avconsultora.marketing', LW / 2, LH - 12, 8, S.PAL.C3, 'center', [[1, S.PAL.K]]);
+  drawButton(t, rc, ry + qBox + gapR);
 }
 
 export function renderAt(seconds) {
   const t = mod(seconds, LOOP_S);
+  ctx = bctx;
   drawBackground(t);
   drawUI(t);
   sctx.drawImage(buf, 0, 0, LW, LH, 0, 0, LW * SCALE, LH * SCALE);
+  sctx.drawImage(ubuf, 0, 0, UW, UH, 0, 0, UW * 2, UH * 2);
 }
 
 window.renderAt = renderAt;
