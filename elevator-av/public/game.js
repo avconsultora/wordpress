@@ -1,13 +1,13 @@
 // ELEVATOR AV — motor del juego.
 // Los números de gameplay viven en config.js (CONFIG).
-import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=8';
+import { CONFIG, PHRASES, EVENT_ID } from './config.js?v=9';
 import {
   difficultyFor, evaluateStop, HIT, OVER, nextPhrase, wrapPhrase,
   cleanNickname, moderateNickname, normalizeWhatsapp, isValidWhatsapp,
-} from './logic.js?v=8';
-import * as S from './sprites.js?v=8';
-import * as sfx from './audio.js?v=8';
-import { submitScore, fetchRanking, submitLead, startServerGame } from './ranking.js?v=8';
+} from './logic.js?v=9';
+import * as S from './sprites.js?v=9';
+import * as sfx from './audio.js?v=9';
+import { submitScore, fetchRanking, submitLead, startServerGame } from './ranking.js?v=9';
 
 const params = new URLSearchParams(location.search);
 // El modo debug solo funciona si config.js lo habilita (debugEnabled: true).
@@ -27,7 +27,7 @@ const KEY_PHRASES = 'eav_phrases';
 const $ = (id) => document.getElementById(id);
 
 if (params.get('display') === '1') {
-  import('./display.js?v=8');
+  import('./display.js?v=9');
 } else {
   boot();
 }
@@ -476,7 +476,12 @@ function boot() {
     lastT = 0;
     acceptAfter = performance.now() + 250;
     $('pause').classList.remove('on');
-    if (state === 'moving') sfx.humStart(speed);
+    // Pausar no puede dar ventaja: si se pausó en pleno viaje, la ronda
+    // arranca de nuevo desde el piso de salida (mismo objetivo).
+    if (state === 'moving') {
+      pos = floorBase;
+      sfx.humStart(speed);
+    }
   }
 
   document.addEventListener('visibilitychange', () => {

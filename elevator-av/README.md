@@ -190,21 +190,50 @@ Poné `debugEnabled: true` en `config.js` (solo en tu compu, **nunca en el hosti
 
 ---
 
-## 7. Anti-trampa
+## 7. Seguridad y anti-trampa
 
-- El servidor anota cuándo empieza cada partida (`start_game`) y mide él la duración al guardar. La duración que manda el celular se ignora.
+Todo está en `supabase.sql` (instalación nueva) o en `supabase-seguridad.sql` (para aplicar sobre una base existente). Los dos se pueden correr más de una vez.
+
+**Ranking**
+- El servidor registra cuándo empieza cada partida (`start_game`) y mide él la duración al guardar. La duración que manda el celular se ignora.
+- Se exige al menos el 90% del tiempo mínimo teórico para ese score.
 - El piso alcanzado tiene que ser coherente con los aciertos.
-- Una partida solo se puede guardar una vez.
-- El modo debug está apagado en producción.
+- Una partida se guarda una sola vez.
+- **Tope de 80 aciertos** (`max_plausible_score()`). Si alguien bueno de verdad lo alcanza, subilo:
+  ```sql
+  create or replace function public.max_plausible_score() returns int language sql immutable as $fn$ select 120 $fn$;
+  ```
+- Pausar no da ventaja: al reanudar, la ronda vuelve al piso de salida.
+- El modo debug está apagado en producción (`debugEnabled: false`).
 
-Si en un ranking ya existente aparece un score raro:
+**Datos**
+- Con la key pública no se puede leer ninguna tabla: ni `scores`, ni `leads`, ni `games`. El ranking sale solo por `get_ranking`.
+- Las funciones internas no se pueden llamar desde afuera.
+- En los leads se limpian los caracteres que Excel interpreta como fórmula (`= + - @`).
+
+**Límites por IP** (generosos, porque en un evento muchos celulares comparten el Wi-Fi)
+- 120 partidas cada 10 minutos.
+- 60 scores guardados cada 10 minutos.
+- 40 consultas gratis por hora.
+
+Para ver de qué IP vino un score sospechoso: Table Editor → `scores` → columna `ip`.
+
+**Hosting** (`.htaccess`)
+- HTTPS obligatorio (HSTS).
+- Política de seguridad de contenido: solo scripts propios y solo conexiones a Supabase.
+- No se puede embeber en otra página.
+
+**Supabase: recomendado hacerlo a mano una vez**
+- Authentication → Sign In / Providers → desactivá **Allow new users to sign up**. El juego no usa cuentas.
+
+**Lo que ningún juego de navegador puede evitar del todo:** un bot que mire la pantalla y toque solo, o alguien que modifique el juego en su propio navegador para que vaya más lento. El tope de aciertos y los controles de tiempo lo hacen mucho más difícil. Si igual aparece algo imposible:
 
 ```sql
-select nickname, score, max_floor, duration_ms, created_at
+select nickname, score, max_floor, duration_ms, ip, created_at
 from scores where event_id = 'evento-2026' order by score desc limit 20;
 ```
 
-Una partida real de N aciertos dura unos 2,2 s por acierto; por ejemplo, 135 aciertos llegan al piso 1211–1301 en unos 5 minutos. Un juego del lado del navegador nunca es 100% inviolable: si aparece algo imposible, se borra en 30 segundos (sección 5).
+Una partida real dura unos 2,2 a 4 s por acierto. Se borra como en la sección 5.
 
 ## 8. Desarrollo
 

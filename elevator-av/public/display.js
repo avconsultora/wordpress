@@ -1,9 +1,9 @@
 // Vista de pantalla grande (?display=1): ranking + QR, se actualiza sola.
-import { GAME_URL, DISPLAY_REFRESH_MS } from './config.js?v=8';
-import { fetchRanking } from './ranking.js?v=8';
-import { qrCanvas } from './qr.js?v=8';
-import * as S from './sprites.js?v=8';
-import { renderRanking } from './game.js?v=8';
+import { GAME_URL, DISPLAY_REFRESH_MS } from './config.js?v=9';
+import { fetchRanking } from './ranking.js?v=9';
+import { qrCanvas } from './qr.js?v=9';
+import * as S from './sprites.js?v=9';
+import { renderRanking } from './game.js?v=9';
 
 const $ = (id) => document.getElementById(id);
 
