@@ -3,13 +3,44 @@
 
 	var abrirModalGlobal = function () {};
 
-	document.addEventListener( 'DOMContentLoaded', function () {
+	function init() {
+		prepararContenedores();
 		iniciarFiltros();
 		iniciarModal();
 		iniciarChancho();
-	} );
+	}
 
-	/* ---------------- Archivo: filtros y chancho ---------------- */
+	function prepararContenedores() {
+		var raices = document.querySelectorAll( '.gp-hero, .gp-catalogo-wrap, .gp-seccion-partes' );
+		if ( ! raices.length ) {
+			return;
+		}
+		if ( document.querySelector( '.gp-catalogo-wrap, .gp-hero' ) ) {
+			document.body.classList.add( 'gp-pagina-archivo' );
+		}
+		raices.forEach( function ( el ) {
+			var nodo = el.parentElement;
+			while ( nodo && nodo !== document.body ) {
+				if (
+					nodo.classList.contains( 'e-con' ) ||
+					nodo.classList.contains( 'e-con-inner' ) ||
+					nodo.classList.contains( 'elementor-widget' ) ||
+					nodo.classList.contains( 'elementor-widget-container' )
+				) {
+					nodo.classList.add( 'gp-e-con-limpio' );
+				}
+				nodo = nodo.parentElement;
+			}
+		} );
+	}
+
+	if ( 'loading' === document.readyState ) {
+		document.addEventListener( 'DOMContentLoaded', init );
+	} else {
+		init();
+	}
+
+	/* ---------------- Archivo: filtros y chancho interactivo ---------------- */
 
 	function iniciarFiltros() {
 		document.querySelectorAll( '.gp-archivo' ).forEach( iniciarArchivo );
@@ -32,17 +63,21 @@
 		var estado = { categoria: 'todos', parte: null };
 
 		function partesDe( tarjeta ) {
-			return ( tarjeta.getAttribute( 'data-partes' ) || '' ).split( ' ' ).filter( Boolean );
+			return ( tarjeta.getAttribute( 'data-partes' ) || '' )
+				.toLowerCase()
+				.split( /\s+/ )
+				.filter( Boolean );
 		}
 
 		function aplicar() {
 			var visibles = 0;
 
 			tarjetas.forEach( function ( tarjeta ) {
-				var cats   = ( tarjeta.getAttribute( 'data-cats' ) || '' ).split( ' ' );
+				var cats   = ( tarjeta.getAttribute( 'data-cats' ) || '' ).toLowerCase().split( /\s+/ );
 				var partes = partesDe( tarjeta );
-				var okCat  = 'todos' === estado.categoria || cats.indexOf( estado.categoria ) !== -1;
-				var okPar  = ! estado.parte || partes.indexOf( estado.parte ) !== -1;
+
+				var okCat = 'todos' === estado.categoria || cats.indexOf( estado.categoria.toLowerCase() ) !== -1;
+				var okPar = ! estado.parte || partes.indexOf( estado.parte.toLowerCase() ) !== -1;
 				var visible = okCat && okPar;
 
 				tarjeta.classList.toggle( 'gp-oculto', ! visible );
@@ -53,42 +88,59 @@
 
 			if ( chip ) {
 				chip.hidden = ! estado.parte;
+				if ( estado.parte ) {
+					chip.removeAttribute( 'hidden' );
+				} else {
+					chip.setAttribute( 'hidden', '' );
+				}
 			}
+
 			if ( sinResultados ) {
 				sinResultados.hidden = visibles > 0;
 			}
+
 			if ( chancho ) {
 				chancho.querySelectorAll( '.gp-hotspot, .gp-parte-chip' ).forEach( function ( el ) {
-					el.classList.toggle( 'is-activo', el.getAttribute( 'data-parte' ) === estado.parte );
+					var slug = ( el.getAttribute( 'data-parte' ) || '' ).toLowerCase();
+					el.classList.toggle( 'is-activo', !! estado.parte && slug === estado.parte.toLowerCase() );
 				} );
 			}
 		}
 
 		function elegirParte( slug, nombre ) {
-			estado.parte = ( estado.parte === slug ) ? null : slug;
+			if ( ! slug ) {
+				return;
+			}
+			var normalizado = slug.toLowerCase().trim();
+			estado.parte = ( estado.parte === normalizado ) ? null : normalizado;
+
 			if ( estado.parte && chipNombre ) {
 				chipNombre.textContent = nombre || slug;
 			}
+
 			limpiarResaltado();
 			aplicar();
 			cerrarPanel();
 		}
 
 		botones.forEach( function ( boton ) {
-			boton.addEventListener( 'click', function () {
+			boton.addEventListener( 'click', function ( e ) {
+				e.preventDefault();
 				botones.forEach( function ( b ) {
 					b.classList.remove( 'is-activo' );
 				} );
 				boton.classList.add( 'is-activo' );
-				estado.categoria = boton.getAttribute( 'data-gp-filtro' );
+				estado.categoria = boton.getAttribute( 'data-gp-filtro' ) || 'todos';
 				aplicar();
 			} );
 		} );
 
 		var limpiar = archivo.querySelector( '[data-gp-chip-limpiar]' );
 		if ( limpiar ) {
-			limpiar.addEventListener( 'click', function () {
+			limpiar.addEventListener( 'click', function ( e ) {
+				e.preventDefault();
 				estado.parte = null;
+				limpiarResaltado();
 				aplicar();
 			} );
 		}
@@ -101,7 +153,8 @@
 			} );
 			if ( chancho ) {
 				chancho.querySelectorAll( '.gp-hotspot' ).forEach( function ( h ) {
-					if ( h.getAttribute( 'data-parte' ) !== estado.parte ) {
+					var slug = ( h.getAttribute( 'data-parte' ) || '' ).toLowerCase();
+					if ( ! estado.parte || slug !== estado.parte.toLowerCase() ) {
 						h.classList.remove( 'is-activo' );
 					}
 				} );
@@ -116,12 +169,13 @@
 		var etiqueta = chancho.querySelector( '[data-gp-etiqueta]' );
 		var hotspots = chancho.querySelectorAll( '.gp-hotspot' );
 
-		// Pasar por una tarjeta prende los puntos de sus cortes.
+		// Pasar el mouse por una tarjeta resalta los hotspots de sus cortes
 		tarjetas.forEach( function ( tarjeta ) {
 			function prender() {
 				var partes = partesDe( tarjeta );
 				hotspots.forEach( function ( h ) {
-					if ( partes.indexOf( h.getAttribute( 'data-parte' ) ) !== -1 ) {
+					var slug = ( h.getAttribute( 'data-parte' ) || '' ).toLowerCase();
+					if ( partes.indexOf( slug ) !== -1 ) {
 						h.classList.add( 'is-activo' );
 					}
 				} );
@@ -132,10 +186,28 @@
 			tarjeta.addEventListener( 'blur', limpiarResaltado );
 		} );
 
-		// Pasar por un punto resalta sus productos en la grilla.
+		// Pasar el mouse por un punto resalta sus productos en la grilla y muestra la etiqueta
 		hotspots.forEach( function ( hotspot ) {
 			function resaltar() {
-				var slug = hotspot.getAttribute( 'data-parte' );
+				var slug = ( hotspot.getAttribute( 'data-parte' ) || '' ).toLowerCase();
+				if ( ! slug ) {
+					return;
+				}
+
+				// Verificar si existe al menos un producto visible que coincida
+				var hayCoincidencia = false;
+				tarjetas.forEach( function ( t ) {
+					if ( ! t.classList.contains( 'gp-oculto' ) && partesDe( t ).indexOf( slug ) !== -1 ) {
+						hayCoincidencia = true;
+					}
+				} );
+
+				// Si el corte no tiene productos en la vista actual, no alterar opacidades de la grilla
+				if ( ! hayCoincidencia ) {
+					limpiarResaltado();
+					return;
+				}
+
 				tarjetas.forEach( function ( t ) {
 					if ( t.classList.contains( 'gp-oculto' ) ) {
 						return;
@@ -144,9 +216,12 @@
 					t.classList.toggle( 'gp-resaltado', coincide );
 					t.classList.toggle( 'gp-atenuado', ! coincide );
 				} );
+
 				if ( etiqueta ) {
-					etiqueta.textContent = hotspot.getAttribute( 'data-nombre' ) || '';
-					etiqueta.hidden = false;
+					var nombre = hotspot.getAttribute( 'data-nombre' ) || slug;
+					etiqueta.textContent = nombre.toUpperCase();
+					etiqueta.removeAttribute( 'hidden' );
+					etiqueta.style.display = 'block';
 					etiqueta.style.left = hotspot.style.left;
 					etiqueta.style.top = hotspot.style.top;
 				}
@@ -155,7 +230,8 @@
 			function apagar() {
 				limpiarResaltado();
 				if ( etiqueta ) {
-					etiqueta.hidden = true;
+					etiqueta.setAttribute( 'hidden', '' );
+					etiqueta.style.display = 'none';
 				}
 			}
 
@@ -163,13 +239,16 @@
 			hotspot.addEventListener( 'focus', resaltar );
 			hotspot.addEventListener( 'mouseleave', apagar );
 			hotspot.addEventListener( 'blur', apagar );
-			hotspot.addEventListener( 'click', function () {
+
+			hotspot.addEventListener( 'click', function ( e ) {
+				e.preventDefault();
 				elegirParte( hotspot.getAttribute( 'data-parte' ), hotspot.getAttribute( 'data-nombre' ) );
 			} );
 		} );
 
 		chancho.querySelectorAll( '.gp-parte-chip' ).forEach( function ( boton ) {
-			boton.addEventListener( 'click', function () {
+			boton.addEventListener( 'click', function ( e ) {
+				e.preventDefault();
 				elegirParte( boton.getAttribute( 'data-parte' ), boton.getAttribute( 'data-nombre' ) );
 			} );
 		} );
@@ -190,17 +269,18 @@
 		}
 
 		if ( abrir && panel ) {
-			abrir.addEventListener( 'click', function () {
+			abrir.addEventListener( 'click', function ( e ) {
+				e.preventDefault();
 				var abierto = panel.classList.toggle( 'is-abierto' );
 				abrir.setAttribute( 'aria-expanded', abierto ? 'true' : 'false' );
 			} );
 
-			// El botón flotante solo mientras el archivo está a la vista:
-			// si no, queda pegado en pantalla sobre el resto de la página.
+			// Botón flotante visible solo mientras el catálogo está en viewport
 			if ( 'IntersectionObserver' in window ) {
 				new IntersectionObserver( function ( entradas ) {
-					abrir.classList.toggle( 'is-visible', entradas[ 0 ].isIntersecting );
-					if ( ! entradas[ 0 ].isIntersecting ) {
+					var enPantalla = entradas[ 0 ].isIntersecting;
+					abrir.classList.toggle( 'is-visible', enPantalla );
+					if ( ! enPantalla ) {
 						cerrarPanel();
 					}
 				} ).observe( archivo );
@@ -210,11 +290,13 @@
 		}
 
 		if ( cerrar ) {
-			cerrar.addEventListener( 'click', cerrarPanel );
+			cerrar.addEventListener( 'click', function ( e ) {
+				e.preventDefault();
+				cerrarPanel();
+			} );
 		}
 
 		if ( panel ) {
-			// Tocar el fondo oscuro (el ::before del panel) también cierra.
 			panel.addEventListener( 'click', function ( evento ) {
 				if ( ! evento.target.closest( '.gp-panel' ) ) {
 					cerrarPanel();
@@ -248,6 +330,7 @@
 				return;
 			}
 			if ( evento.target.closest( '[data-gp-close]' ) ) {
+				evento.preventDefault();
 				cerrarModal();
 			}
 		} );
@@ -284,27 +367,27 @@
 		abrirModalGlobal = abrirModal;
 	}
 
-	/* ---------------- Diagrama del chancho ---------------- */
+	/* ---------------- Diagrama del chancho (Modo Popup) ---------------- */
 
 	function iniciarChancho() {
-		// Solo el del home: el del archivo lo maneja iniciarArchivo().
 		document.querySelectorAll( '[data-gp-chancho][data-gp-modo="popup"]' ).forEach( function ( contenedor ) {
-			var popover = contenedor.querySelector( '[data-gp-popover-render]' );
+			var popover  = contenedor.querySelector( '[data-gp-popover-render]' );
 			var hotspots = contenedor.querySelectorAll( '.gp-hotspot' );
-			var activo = null;
+			var activo   = null;
+
+			if ( ! popover ) {
+				return;
+			}
 
 			function posicionar( hotspot ) {
 				var rectHotspot = hotspot.getBoundingClientRect();
 				var rectBase    = contenedor.getBoundingClientRect();
 				var margen      = 8;
 
-				// Se abre hacia abajo si contra el borde de arriba no entra.
 				var haciaAbajo = ( rectHotspot.top - popover.offsetHeight - 20 ) < rectBase.top;
 				popover.classList.toggle( 'gp-popover--abajo', haciaAbajo );
 				popover.style.top = ( rectHotspot.top - rectBase.top + ( haciaAbajo ? rectHotspot.height : 0 ) ) + 'px';
 
-				// Centrado en el punto, pero sin salirse del contenedor:
-				// lo que se corrige de más se le descuenta a la flecha.
 				var mitad  = popover.offsetWidth / 2;
 				var centro = rectHotspot.left - rectBase.left + rectHotspot.width / 2;
 				var minimo = mitad + margen;
@@ -347,6 +430,7 @@
 					mostrar( hotspot );
 				} );
 				hotspot.addEventListener( 'click', function ( evento ) {
+					evento.preventDefault();
 					evento.stopPropagation();
 					var soloId = hotspot.getAttribute( 'data-gp-solo' );
 					if ( soloId ) {
@@ -363,7 +447,6 @@
 			} );
 
 			contenedor.addEventListener( 'mouseleave', ocultar );
-
 			popover.addEventListener( 'mouseleave', ocultar );
 
 			popover.addEventListener( 'click', function ( evento ) {

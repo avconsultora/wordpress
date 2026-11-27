@@ -53,7 +53,7 @@ function gp_whatsapp_url( $titulo = '' ) {
 
 /**
  * Arma el array de datos de un producto, listo para pintar tarjetas,
- * el popup y los tooltips del chancho.
+ * el popup y los tooltips del chancho con imágenes de alta definición.
  */
 function gp_get_producto_data( $post_id ) {
 	$post = get_post( $post_id );
@@ -64,24 +64,28 @@ function gp_get_producto_data( $post_id ) {
 	$categorias = wp_get_post_terms( $post_id, 'cat-prod', array( 'fields' => 'all' ) );
 	$partes     = wp_get_post_terms( $post_id, 'parte_cerdo', array( 'fields' => 'slugs' ) );
 
+	$imagen_large = get_the_post_thumbnail_url( $post_id, 'large' );
+	$imagen_full  = get_the_post_thumbnail_url( $post_id, 'full' );
+
 	return array(
-		'id'          => $post_id,
-		'titulo'      => get_the_title( $post_id ),
-		'permalink'   => get_permalink( $post_id ),
-		'imagen'      => get_the_post_thumbnail_url( $post_id, 'medium_large' ),
-		'imagen_grande' => get_the_post_thumbnail_url( $post_id, 'large' ),
-		'presentacion' => gp_field( 'presentacion', $post_id ),
-		'tips'        => gp_field( 'tips_consumo', $post_id ),
-		'categorias'  => is_wp_error( $categorias ) ? array() : $categorias,
-		'cat_slugs'   => is_wp_error( $categorias ) ? array() : wp_list_pluck( $categorias, 'slug' ),
-		'partes'      => is_wp_error( $partes ) ? array() : $partes,
-		'destacado'   => gp_is_destacado( $post_id ),
+		'id'            => $post_id,
+		'titulo'        => get_the_title( $post_id ),
+		'permalink'     => get_permalink( $post_id ),
+		'imagen'        => $imagen_large ? $imagen_large : $imagen_full,
+		'imagen_grande' => $imagen_full ? $imagen_full : $imagen_large,
+		'presentacion'  => gp_field( 'presentacion', $post_id ),
+		'tips'          => gp_field( 'tips_consumo', $post_id ),
+		'categorias'    => is_wp_error( $categorias ) ? array() : $categorias,
+		'cat_slugs'     => is_wp_error( $categorias ) ? array() : wp_list_pluck( $categorias, 'slug' ),
+		'partes'        => is_wp_error( $partes ) ? array() : $partes,
+		'destacado'     => gp_is_destacado( $post_id ),
 	);
 }
 
 /**
  * Contenido interno del popup/ficha de un producto (se reutiliza en el
  * <template> de las tarjetas y en el single de WordPress).
+ * Utiliza imagen nítida en alta resolución ('full' o 'large') y srcset calibrado.
  */
 function gp_render_detalle( $data, $echo = true ) {
 	if ( empty( $data ) ) {
@@ -91,16 +95,16 @@ function gp_render_detalle( $data, $echo = true ) {
 	ob_start();
 	?>
 	<div class="gp-detalle" data-id="<?php echo esc_attr( $data['id'] ); ?>">
-		<?php if ( $data['imagen_grande'] ) : ?>
+		<?php if ( $data['imagen_grande'] || $data['imagen'] ) : ?>
 			<div class="gp-detalle__media">
 				<?php
 				echo get_the_post_thumbnail(
 					$data['id'],
-					'large',
+					'full',
 					array(
 						'alt'     => $data['titulo'],
 						'loading' => 'lazy',
-						'sizes'   => '(max-width: 640px) 88vw, 320px',
+						'sizes'   => '(max-width: 640px) 92vw, 600px',
 					)
 				);
 				?>
@@ -125,7 +129,7 @@ function gp_render_detalle( $data, $echo = true ) {
 			<?php endif; ?>
 			<a class="gp-cta-whatsapp" target="_blank" rel="nofollow noopener" href="<?php echo esc_url( gp_whatsapp_url( $data['titulo'] ) ); ?>">
 				<?php echo gp_whatsapp_icon(); ?>
-				<?php esc_html_e( 'Quiero distribuir Granalier', 'granalier-productos' ); ?>
+				<span><?php esc_html_e( 'Quiero distribuir Granalier', 'granalier-productos' ); ?></span>
 			</a>
 		</div>
 	</div>
@@ -179,12 +183,13 @@ function gp_aviso_admin( $mensaje, $url = '', $texto_enlace = '' ) {
 }
 
 /**
- * Silueta simple de cerdo para el botón flotante del archivo en mobile.
+ * Ícono minimalista y bien proporcionado para el botón flotante del archivo en mobile.
+ * ViewBox 24x24 cuadrado y trazo limpio sin deformación.
  */
 function gp_chancho_icon() {
-	return '<svg class="gp-icon-chancho" viewBox="0 0 32 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M27.4 6.6 29.6 4c.4-.5 1.2-.2 1.2.5v5.2c1 1.4 1.5 3 1.5 4.6 0 2.6-1.3 4.9-3.4 6.5v2c0 .6-.5 1.2-1.2 1.2h-2c-.6 0-1.2-.5-1.2-1.2v-.8c-1.4.4-2.9.6-4.4.6h-.6v.2c0 .6-.5 1.2-1.2 1.2h-2c-.6 0-1.2-.5-1.2-1.2v-1c-1.4-.5-2.6-1.3-3.6-2.3v3.1c0 .6-.5 1.2-1.2 1.2h-2c-.6 0-1.2-.5-1.2-1.2v-5.6C5 15 4.2 13.4 3.8 11.6H2.4C1.1 11.6 0 10.5 0 9.2s1.1-2.4 2.4-2.4h1.4C5 3.5 8.5 1.2 12.8.7c2.2-.3 4.4-.2 6.6.1 3 .5 5.7 2.1 8 5.8Zm-4.8 4.2a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z"/></svg>';
+	return '<svg class="gp-icon-chancho" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path d="M21.7 10.3c-.2-.6-.7-1.1-1.3-1.3-.2-.7-.6-1.3-1.1-1.8l.8-1.5c.2-.3.1-.7-.2-.9-.3-.2-.7-.1-.9.2l-.9 1.6c-1-.5-2.2-.8-3.5-.8-3.5 0-6.7 1.8-8.1 4.5-.7.1-1.3.4-1.7.9-.6.7-.7 1.7-.3 2.5.3.6.8 1.1 1.4 1.3.2 1.8 1.4 3.4 3.2 4.1v1.6c0 .4.3.8.8.8h1.8c.4 0 .8-.4.8-.8v-1.1h3.4v1.1c0 .4.3.8.8.8h1.8c.4 0 .8-.4.8-.8v-1.8c2-1.2 3.2-3.3 3.2-5.6 0-.8-.2-1.6-.7-2.3.1-.4.1-.7 0-1.1zM17.5 9.5c.6 0 1 .4 1 1s-.4 1-1 1-1-.4-1-1 .4-1 1-1z"/></svg>';
 }
 
 function gp_whatsapp_icon() {
-	return '<svg class="gp-icon-wa" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16.04 2.67c-7.36 0-13.33 5.97-13.33 13.33 0 2.35.62 4.63 1.79 6.64L2.67 29.33l6.86-1.8a13.27 13.27 0 0 0 6.51 1.66h.01c7.36 0 13.33-5.97 13.33-13.33S23.4 2.67 16.04 2.67Zm0 24.4h-.01a11.1 11.1 0 0 1-5.65-1.55l-.4-.24-4.07 1.07 1.09-3.97-.26-.41a11.06 11.06 0 0 1-1.7-5.93c0-6.13 4.99-11.12 11.12-11.12 2.97 0 5.76 1.16 7.86 3.26a11.03 11.03 0 0 1 3.25 7.86c0 6.13-4.99 11.03-11.13 11.03Zm6.1-8.3c-.33-.17-1.97-.97-2.28-1.08-.31-.11-.53-.17-.76.17-.22.33-.87 1.08-1.07 1.3-.2.22-.39.25-.72.08-.33-.17-1.39-.51-2.65-1.63-.98-.87-1.64-1.95-1.83-2.28-.19-.33-.02-.5.15-.67.15-.15.33-.39.5-.58.16-.2.22-.33.33-.55.11-.22.06-.42-.03-.58-.08-.17-.76-1.83-1.04-2.5-.27-.65-.55-.56-.76-.57l-.65-.01c-.22 0-.58.08-.89.42-.31.33-1.17 1.14-1.17 2.79 0 1.64 1.2 3.23 1.36 3.45.17.22 2.35 3.6 5.7 5.05.8.35 1.42.55 1.9.7.8.26 1.53.22 2.1.13.64-.1 1.97-.8 2.25-1.58.28-.77.28-1.43.2-1.57-.08-.14-.3-.22-.63-.39Z"/></svg>';
+	return '<svg class="gp-icon-wa" viewBox="0 0 32 32" width="18" height="18" fill="currentColor" aria-hidden="true" focusable="false"><path d="M16.04 2.67c-7.36 0-13.33 5.97-13.33 13.33 0 2.35.62 4.63 1.79 6.64L2.67 29.33l6.86-1.8a13.27 13.27 0 0 0 6.51 1.66h.01c7.36 0 13.33-5.97 13.33-13.33S23.4 2.67 16.04 2.67Zm0 24.4h-.01a11.1 11.1 0 0 1-5.65-1.55l-.4-.24-4.07 1.07 1.09-3.97-.26-.41a11.06 11.06 0 0 1-1.7-5.93c0-6.13 4.99-11.12 11.12-11.12 2.97 0 5.76 1.16 7.86 3.26a11.03 11.03 0 0 1 3.25 7.86c0 6.13-4.99 11.03-11.13 11.03Zm6.1-8.3c-.33-.17-1.97-.97-2.28-1.08-.31-.11-.53-.17-.76.17-.22.33-.87 1.08-1.07 1.3-.2.22-.39.25-.72.08-.33-.17-1.39-.51-2.65-1.63-.98-.87-1.64-1.95-1.83-2.28-.19-.33-.02-.5.15-.67.15-.15.33-.39.5-.58.16-.2.22-.33.33-.55.11-.22.06-.42-.03-.58-.08-.17-.76-1.83-1.04-2.5-.27-.65-.55-.56-.76-.57l-.65-.01c-.22 0-.58.08-.89.42-.31.33-1.17 1.14-1.17 2.79 0 1.64 1.2 3.23 1.36 3.45.17.22 2.35 3.6 5.7 5.05.8.35 1.42.55 1.9.7.8.26 1.53.22 2.1.13.64-.1 1.97-.8 2.25-1.58.28-.77.28-1.43.2-1.57-.08-.14-.3-.22-.63-.39Z"/></svg>';
 }

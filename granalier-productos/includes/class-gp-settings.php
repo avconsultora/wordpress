@@ -187,9 +187,9 @@ class GP_Settings {
 			<hr />
 			<h2><?php esc_html_e( 'Shortcodes disponibles', 'granalier-productos' ); ?></h2>
 			<ul style="list-style:disc;padding-left:1.5em;">
-				<li><code>[granalier_productos_archivo]</code> — <?php esc_html_e( 'Listado completo con filtro de categorías en vivo.', 'granalier-productos' ); ?></li>
+				<li><code>[granalier_productos_archivo titulo="Lo mejor de lo nuestro..." hero="si|no" banner="..." seccion_partes="si|no"]</code> — <?php esc_html_e( 'Catálogo interactivo completo con hero superior, textura madera, filtros de categoría, ubicador de cortes y sección educativa.', 'granalier-productos' ); ?></li>
 				<li><code>[granalier_productos_destacados cantidad="6" categoria=""]</code> — <?php esc_html_e( 'Grilla de destacados para el home, sin fondo.', 'granalier-productos' ); ?></li>
-				<li><code>[granalier_chancho]</code> — <?php esc_html_e( 'Diagrama interactivo del chancho.', 'granalier-productos' ); ?></li>
+				<li><code>[granalier_chancho seccion="si|no"]</code> — <?php esc_html_e( 'Diagrama interactivo del chancho (con popover o sección educativa completa).', 'granalier-productos' ); ?></li>
 				<li><code>[granalier_producto id="123"]</code> — <?php esc_html_e( 'Ficha de un producto puntual, embebida (sin popup).', 'granalier-productos' ); ?></li>
 			</ul>
 			<p>

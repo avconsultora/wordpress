@@ -1,22 +1,25 @@
 /*
  * Granalier Productos
- * Paleta tomada del catálogo oficial y del home: bordó #832931,
- * bordó oscuro de los bloques, arena de los títulos sobre bordó.
- * No redefine tipografía global (hereda Hello Elementor); solo pinta
- * sus propios componentes: tarjetas foto, chancho, popup y CTA.
- *
- * IMPORTANTE sobre la especificidad: Elementor genera reglas como
- * `.elementor-kit-9 button { ... }` e `.elementor-kit-9 img { ... }`
- * que cargan DESPUÉS del plugin y le ganan a una clase suelta. Como
- * las tarjetas y los filtros son <button>, sin blindaje heredan los
- * botones del sitio (fondo blanco, borde de color, texto sin cortar)
- * y las fotos dejan de recortarse. Por eso los selectores van
- * anclados al contenedor y las pocas propiedades que el theme pisa
- * llevan !important.
+ * Paleta corporativa: bordó #6E2231, bordó oscuro #541622, arena #d8b88e, arena clara #ecd9bf.
+ * Estrictamente encapsulado bajo clases prefijadas .gp-* para respetar Hello Elementor y el theme.
  */
 
-/* Reset acotado a los componentes propios: sin esto, un theme que no
-   aplique border-box hace que el padding desborde la tarjeta. */
+:root {
+	--gp-bordo: #6E2231;
+	--gp-bordo-oscuro: #541622;
+	--gp-arena: #d8b88e;
+	--gp-arena-clara: #ecd9bf;
+	--gp-tinta: #3a2a26;
+	--gp-radio: 16px;
+}
+
+/* Reset acotado exclusivamente a componentes del plugin */
+.gp-hero,
+.gp-hero *,
+.gp-catalogo-wrap,
+.gp-catalogo-wrap *,
+.gp-seccion-partes,
+.gp-seccion-partes *,
 .gp-card,
 .gp-card *,
 .gp-detalle,
@@ -28,295 +31,161 @@
 	box-sizing: border-box;
 }
 
-:root {
-	--gp-bordo: #832931;
-	--gp-bordo-oscuro: #5c1a21;
-	--gp-arena: #d8b88e;
-	--gp-arena-clara: #ecd9bf;
-	--gp-tinta: #3a2a26;
-	--gp-radio: 16px;
+/* Evitar outlines indeseados o bordes residuales del theme en focos */
+.gp-card:focus,
+.gp-card:focus-visible,
+.gp-filtro:focus,
+.gp-filtro:focus-visible,
+.gp-hotspot:focus,
+.gp-hotspot:focus-visible {
+	outline: none !important;
 }
 
-/* ---------- Archivo con el chancho al costado ---------- */
-/* Sticky y no fixed: acompaña el scroll de la grilla pero se queda
-   dentro de la sección, sin taparle el header ni montarse al footer.
-   --gp-chancho-top se ajusta si el sitio tiene header fijo. */
-.gp-archivo--con-chancho {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) 320px;
-	gap: 2.5rem;
-	align-items: start;
+/* ---------- Pantalla de Productos: Header transparente sobre Hero y sin espacios ---------- */
+body.gp-pagina-archivo,
+body:has(.gp-catalogo-wrap) {
+	position: relative !important;
+	overflow-x: clip !important;
 }
 
-.gp-archivo__chancho {
-	position: sticky;
-	top: var(--gp-chancho-top, 100px);
-}
-
-.gp-archivo .gp-panel {
-	background: var(--gp-bordo-oscuro);
-	border-radius: var(--gp-radio);
-	padding: 1.1rem 1.2rem 1.3rem;
-}
-
-.gp-archivo .gp-panel__cabecera {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1rem;
-	margin-bottom: 0.75rem;
-}
-
-.gp-archivo .gp-panel__titulo {
-	color: var(--gp-arena);
-	text-transform: uppercase;
-	letter-spacing: 0.1em;
-	font-size: 0.72rem;
-	font-weight: 700;
-}
-
-.gp-archivo .gp-panel__cerrar {
-	display: none;
+body.gp-pagina-archivo > header,
+body.gp-pagina-archivo .site-header,
+body.gp-pagina-archivo .elementor-location-header,
+body:has(.gp-catalogo-wrap) > header,
+body:has(.gp-catalogo-wrap) .site-header,
+body:has(.gp-catalogo-wrap) .elementor-location-header {
+	position: absolute !important;
+	top: 0 !important;
+	left: 0 !important;
+	right: 0 !important;
+	width: 100% !important;
 	background: transparent !important;
-	border: none !important;
+	background-color: transparent !important;
 	box-shadow: none !important;
-	padding: 0 !important;
-	margin: 0 !important;
-	font-size: 1.8rem;
-	line-height: 1;
-	color: rgba(255, 255, 255, 0.8) !important;
-	cursor: pointer;
-}
-
-.gp-archivo .gp-panel__ayuda {
-	margin: 0.85rem 0 0;
-	color: rgba(255, 255, 255, 0.7);
-	font-size: 0.78rem;
-	line-height: 1.35;
-}
-
-/* Etiqueta con el nombre del corte al pasar por un punto. */
-.gp-chancho .gp-etiqueta {
-	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: 5;
-	transform: translate(-50%, calc(-100% - 12px));
-	background: #fff;
-	color: var(--gp-bordo);
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	font-size: 0.68rem;
-	font-weight: 700;
-	padding: 0.35rem 0.6rem;
-	border-radius: 4px;
-	white-space: nowrap;
-	pointer-events: none;
-	box-shadow: 0 8px 18px rgba(31, 12, 14, 0.3);
-}
-
-.gp-chancho .gp-etiqueta[hidden] {
-	display: none;
-}
-
-/* El punto encendido pulsa, así se encuentra rápido en el diagrama. */
-.gp-chancho .gp-hotspot.is-activo .gp-hotspot__anillo {
-	animation: gp-pulso 1.5s ease-out infinite;
-}
-
-@keyframes gp-pulso {
-	0% {
-		box-shadow: 0 0 0 0 rgba(216, 184, 142, 0.6);
-	}
-	70% {
-		box-shadow: 0 0 0 12px rgba(216, 184, 142, 0);
-	}
-	100% {
-		box-shadow: 0 0 0 0 rgba(216, 184, 142, 0);
-	}
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.gp-chancho .gp-hotspot.is-activo .gp-hotspot__anillo {
-		animation: none;
-	}
-}
-
-/* Resaltado cruzado grilla <-> chancho. */
-.gp-grid .gp-card.gp-atenuado {
-	opacity: 0.3;
-}
-
-.gp-grid .gp-card.gp-resaltado {
-	box-shadow: 0 0 0 3px var(--gp-arena), 0 18px 34px rgba(58, 42, 38, 0.28);
-}
-
-/* Chip del corte activo. */
-.gp-archivo .gp-chip {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.5rem;
-	background: var(--gp-bordo);
-	color: #fff;
-	border-radius: 999px;
-	padding: 0.45rem 0.5rem 0.45rem 1rem;
-	font-size: 0.8rem;
-	margin: 0 0 1.5rem;
-}
-
-.gp-archivo .gp-chip[hidden] {
-	display: none;
-}
-
-.gp-archivo .gp-chip button {
-	background: rgba(255, 255, 255, 0.2) !important;
 	border: none !important;
-	box-shadow: none !important;
-	color: #fff !important;
-	width: 22px;
-	height: 22px;
-	min-width: 0 !important;
-	padding: 0 !important;
 	margin: 0 !important;
-	border-radius: 50% !important;
-	font-size: 1rem;
-	line-height: 1;
-	cursor: pointer;
+	z-index: 100;
 }
 
-/* Botón flotante: solo en mobile. */
-.gp-archivo .gp-chancho-fab {
-	display: none;
-	position: fixed;
-	right: 1rem;
-	bottom: 1rem;
-	z-index: 30;
-	align-items: center;
-	gap: 0.5rem;
-	background: var(--gp-bordo) !important;
-	color: #fff !important;
+body.gp-pagina-archivo > header > .e-con,
+body.gp-pagina-archivo .elementor-location-header > .e-con,
+body.gp-pagina-archivo .elementor-location-header > .e-con > .e-con-inner,
+body.gp-pagina-archivo .site-header > .header-inner,
+body:has(.gp-catalogo-wrap) > header > .e-con,
+body:has(.gp-catalogo-wrap) .elementor-location-header > .e-con,
+body:has(.gp-catalogo-wrap) .elementor-location-header > .e-con > .e-con-inner,
+body:has(.gp-catalogo-wrap) .site-header > .header-inner {
+	background: transparent !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
 	border: none !important;
-	border-radius: 999px !important;
-	padding: 0.85rem 1.2rem !important;
-	margin: 0 !important;
-	font-size: 0.78rem;
-	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-	box-shadow: 0 10px 24px rgba(31, 12, 14, 0.35) !important;
-	cursor: pointer;
 }
 
-.gp-archivo .gp-icon-chancho {
-	width: 22px !important;
-	height: 22px !important;
-	flex: none;
+/* ---------- Hero Superior del Catálogo ---------- */
+.gp-hero {
+	position: relative;
+	width: 100vw;
+	left: 50%;
+	right: 50%;
+	margin-left: -50vw;
+	margin-right: -50vw;
+	max-width: 100vw;
+	box-sizing: border-box;
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+	padding: clamp(7.5rem, 12vw, 10rem) 1.5rem clamp(3.5rem, 6vw, 5rem);
+	background-color: var(--gp-bordo-oscuro);
+	background-image:
+		linear-gradient(
+			180deg,
+			rgba(60, 14, 24, 0.85) 0%,
+			rgba(110, 34, 49, 0.72) 55%,
+			rgba(84, 22, 34, 0.9) 100%
+		),
+		var(--gp-hero-bg, url('https://granalier.com.ar/wp-content/uploads/2023/01/banner-cortes.png'));
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
+	text-align: center;
+	overflow: hidden;
 }
 
-/* Lista de cortes por nombre: reemplaza a los puntos en mobile. */
-.gp-chancho__lista {
-	display: none;
-	list-style: none;
-	margin: 1rem 0 0;
-	padding: 0;
-	flex-wrap: wrap;
-	gap: 0.4rem;
+.gp-hero .gp-hero__contenido {
+	position: relative;
+	z-index: 2;
+	max-width: 900px;
+	margin: 0 auto;
 }
 
-.gp-chancho .gp-parte-chip {
-	background: rgba(255, 255, 255, 0.12) !important;
-	border: 1px solid rgba(216, 184, 142, 0.4) !important;
-	box-shadow: none !important;
+.gp-hero .gp-archivo__titulo,
+.gp-hero .gp-hero__titulo {
+	text-align: center;
 	color: #fff !important;
-	border-radius: 999px !important;
-	padding: 0.55rem 0.9rem !important;
-	margin: 0 !important;
-	font-size: 0.8rem;
-	line-height: 1;
-	white-space: nowrap !important;
-	cursor: pointer;
+	font-weight: 400 !important;
+	font-size: clamp(1.85rem, 3.6vw, 2.75rem) !important;
+	line-height: 1.2 !important;
+	margin: 0 0 1.25rem !important;
+	width: 100%;
+	text-shadow: 0 2px 16px rgba(31, 12, 14, 0.45);
 }
 
-.gp-chancho .gp-parte-chip[disabled] {
-	opacity: 0.4;
-	cursor: default;
+.gp-hero .gp-hero__linea {
+	width: 70px;
+	height: 2px;
+	background: var(--gp-arena);
+	margin: 0 auto;
 }
 
-.gp-chancho .gp-parte-chip.is-activo {
-	background: var(--gp-arena) !important;
-	border-color: var(--gp-arena) !important;
-	color: var(--gp-bordo-oscuro) !important;
-}
-
-/* Mobile: el chancho pasa a un panel inferior que abre el botón flotante. */
-@media (max-width: 900px) {
-	.gp-archivo--con-chancho {
-		grid-template-columns: 1fr;
-		gap: 0;
-	}
-
-	.gp-archivo__chancho {
-		position: fixed;
-		top: auto;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		z-index: 40;
-		padding: 0 0.6rem 0.6rem;
-		transform: translateY(105%);
-		transition: transform 0.3s ease;
-		pointer-events: none;
-	}
-
-	.gp-archivo__chancho.is-abierto {
-		transform: none;
-		pointer-events: auto;
-	}
-
-	.gp-archivo__chancho.is-abierto::before {
-		content: "";
-		position: fixed;
-		inset: 0;
-		z-index: -1;
-		background: rgba(31, 12, 14, 0.65);
-	}
-
-	.gp-archivo .gp-panel {
-		max-height: 80vh;
-		overflow-y: auto;
-		box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.45);
-	}
-
-	.gp-archivo .gp-panel__cerrar {
-		display: block;
-	}
-
-	.gp-archivo .gp-chancho-fab.is-visible {
-		display: inline-flex;
-	}
-
-	/* Aire abajo para que el botón flotante no tape la última fila. */
-	.gp-archivo--con-chancho {
-		padding-bottom: 4.5rem;
-	}
-
-	.gp-chancho__lista {
-		display: flex;
-	}
-
-	/* Puntos un poco más grandes para el dedo. */
-	.gp-chancho--filtro .gp-hotspot {
-		width: 34px !important;
-		height: 34px !important;
-		margin: -17px 0 0 -17px !important;
-	}
-
-	.gp-archivo .gp-panel__ayuda {
-		display: none;
+@media (max-width: 600px) {
+	.gp-hero {
+		padding: 6.5rem 1.25rem 3rem;
 	}
 }
 
-/* ---------- Filtros de categoría ---------- */
+/* ---------- Contenedor del Catálogo y Fondo Textura Madera (Fija y Cover) ---------- */
+.gp-catalogo-wrap {
+	position: relative;
+	width: 100vw;
+	left: 50%;
+	right: 50%;
+	margin-left: -50vw;
+	margin-right: -50vw;
+	box-sizing: border-box;
+	max-width: 100vw;
+	background-image: url('../FondoProductos-1.png');
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: cover;
+	background-attachment: fixed;
+	padding: 3.5rem 1.5rem 4rem;
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+}
+
+.gp-catalogo-wrap--con-hero {
+	padding-top: 3.25rem;
+}
+
+.gp-catalogo-container {
+	position: relative;
+	z-index: 2;
+	max-width: 1180px;
+	margin: 0 auto;
+	box-sizing: border-box;
+}
+
+/* ---------- Título Superior del Archivo (fallback cuando hero="no") ---------- */
+.gp-catalogo-wrap .gp-archivo__titulo {
+	text-align: center;
+	color: var(--gp-bordo) !important;
+	font-weight: 400 !important;
+	font-size: clamp(1.6rem, 3vw, 2.25rem) !important;
+	line-height: 1.25 !important;
+	margin: 0 0 2rem !important;
+	width: 100%;
+}
+
+/* ---------- Filtros de Categoría ---------- */
 .gp-archivo .gp-filtros {
 	display: flex;
 	flex-wrap: wrap;
@@ -327,7 +196,7 @@
 
 .gp-archivo .gp-filtro {
 	background: transparent !important;
-	border: 1px solid rgba(131, 41, 49, 0.35) !important;
+	border: 1px solid rgba(110, 34, 49, 0.45) !important;
 	color: var(--gp-bordo) !important;
 	text-transform: uppercase;
 	letter-spacing: 0.09em;
@@ -343,7 +212,7 @@
 
 .gp-archivo .gp-filtro:hover {
 	border-color: var(--gp-bordo) !important;
-	background: rgba(131, 41, 49, 0.07) !important;
+	background: rgba(110, 34, 49, 0.08) !important;
 	color: var(--gp-bordo) !important;
 }
 
@@ -353,6 +222,42 @@
 	color: #fff !important;
 }
 
+/* ---------- Chip del corte activo ---------- */
+.gp-archivo .gp-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--gp-bordo);
+	color: #fff;
+	border-radius: 999px;
+	padding: 0.45rem 0.5rem 0.45rem 1rem;
+	font-size: 0.8rem;
+	margin: 0 0 1.5rem;
+}
+
+.gp-archivo .gp-chip[hidden] {
+	display: none !important;
+}
+
+.gp-archivo .gp-chip button {
+	background: rgba(255, 255, 255, 0.25) !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #fff !important;
+	width: 22px;
+	height: 22px;
+	min-width: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border-radius: 50% !important;
+	font-size: 1rem;
+	line-height: 1;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
 /* ---------- Grilla de productos ---------- */
 .gp-grid {
 	display: grid;
@@ -360,7 +265,7 @@
 	gap: 1.75rem;
 }
 
-/* La tarjeta es la foto: título en blanco arriba, como en el home. */
+/* Tarjeta de producto: botón interactivo con aspect-ratio 3/4 */
 .gp-grid .gp-card {
 	position: relative;
 	display: block;
@@ -374,12 +279,10 @@
 	overflow: hidden;
 	cursor: pointer;
 	box-shadow: 0 14px 30px rgba(58, 42, 38, 0.22);
-	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 	font: inherit;
 	color: #fff !important;
 	text-align: left;
-	/* El theme puede poner white-space: nowrap en los botones y los
-	   títulos largos se cortarían en una sola línea. */
 	white-space: normal !important;
 }
 
@@ -421,6 +324,7 @@
 	inset: 0;
 	background: linear-gradient( to bottom, rgba(31, 12, 14, 0.68) 0%, rgba(31, 12, 14, 0.28) 30%, rgba(31, 12, 14, 0.06) 50%, rgba(31, 12, 14, 0.75) 100% );
 	z-index: 1;
+	pointer-events: none;
 }
 
 .gp-grid .gp-card__body {
@@ -430,6 +334,7 @@
 	display: flex;
 	flex-direction: column;
 	padding: 1.2rem 1.3rem 1.4rem;
+	pointer-events: none;
 }
 
 .gp-grid .gp-card__titulo {
@@ -460,11 +365,9 @@
 }
 
 .gp-grid .gp-card.gp-oculto {
-	display: none;
+	display: none !important;
 }
 
-/* Producto sin foto cargada: el título va centrado sobre el bordó,
-   para que la tarjeta no se vea vacía. */
 .gp-grid .gp-card--sin-foto .gp-card__body {
 	justify-content: center;
 	text-align: center;
@@ -476,7 +379,6 @@
 	transform: none;
 }
 
-/* Variante para el home: sin sombra, para que flote sobre el fondo. */
 .gp-grid .gp-card--sinfondo {
 	box-shadow: none;
 }
@@ -488,38 +390,99 @@
 
 .gp-vacio {
 	text-align: center;
-	opacity: 0.7;
+	color: var(--gp-bordo);
+	font-weight: 500;
+	padding: 2rem 1rem;
+	margin: 0;
 }
 
-/* En pantallas táctiles no hay hover: la presentación va siempre visible. */
+/* En dispositivos táctiles sin hover la presentación se muestra siempre */
 @media (hover: none) {
 	.gp-grid .gp-card__presentacion {
-		opacity: 1;
-		transform: none;
+		opacity: 1 !important;
+		transform: none !important;
 	}
 }
 
-/* En celular, dos productos por fila (como el home) con título más chico. */
+/* Mobile: 2 columnas iguales con títulos adaptados */
 @media (max-width: 600px) {
 	.gp-grid {
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.9rem;
+		grid-template-columns: repeat(2, 1fr) !important;
+		gap: 0.9rem !important;
 	}
 
 	.gp-grid .gp-card__body {
-		padding: 0.85rem 0.9rem 1rem;
+		padding: 0.85rem 0.9rem 1rem !important;
 	}
 
 	.gp-grid .gp-card__titulo {
-		font-size: 1.05rem;
+		font-size: 1.05rem !important;
 	}
 
 	.gp-grid .gp-card__presentacion {
-		font-size: 0.75rem;
+		font-size: 0.75rem !important;
 	}
 }
 
-/* ---------- Diagrama del chancho ---------- */
+/* ---------- Resaltado cruzado grilla <-> chancho ---------- */
+.gp-grid .gp-card.gp-atenuado {
+	opacity: 0.3 !important;
+}
+
+.gp-grid .gp-card.gp-resaltado {
+	box-shadow: 0 0 0 3px var(--gp-arena), 0 18px 34px rgba(58, 42, 38, 0.28) !important;
+	transform: translateY(-4px);
+}
+
+/* ---------- Layout de 2 Columnas y Panel del Chancho en Desktop (> 900px) ---------- */
+.gp-archivo--con-chancho {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 320px;
+	gap: 2.5rem;
+	align-items: start;
+}
+
+.gp-archivo__chancho {
+	position: sticky;
+	top: var(--gp-chancho-top, 100px);
+}
+
+.gp-archivo .gp-panel {
+	background: var(--gp-bordo-oscuro);
+	border-radius: var(--gp-radio);
+	padding: 1.1rem 1.2rem 1.3rem;
+	overflow: visible;
+}
+
+.gp-archivo .gp-panel__cabecera {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	margin-bottom: 0.5rem;
+}
+
+.gp-archivo .gp-panel__cerrar {
+	display: none;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	font-size: 1.8rem;
+	line-height: 1;
+	color: rgba(255, 255, 255, 0.8) !important;
+	cursor: pointer;
+}
+
+.gp-archivo .gp-panel__ayuda {
+	margin: 0.85rem 0 0;
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.78rem;
+	line-height: 1.35;
+	text-align: center;
+}
+
+/* ---------- Diagrama del Cerdo (Lienzo, Puntos y Etiqueta) ---------- */
 .gp-chancho {
 	position: relative;
 	max-width: 760px;
@@ -529,6 +492,7 @@
 .gp-chancho .gp-chancho__lienzo {
 	position: relative;
 	display: block;
+	overflow: visible;
 }
 
 .gp-chancho .gp-chancho__img {
@@ -539,6 +503,7 @@
 	margin: 0;
 }
 
+/* Hotspots interactivos */
 .gp-chancho .gp-hotspot {
 	position: absolute;
 	width: 30px !important;
@@ -555,9 +520,14 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	z-index: 10;
 }
 
-/* Mismo punto que usa hoy el diagrama: anillo blanco con centro lleno. */
+/* Puntos sin productos asociados: completamente ocultos */
+.gp-chancho .gp-hotspot--vacio {
+	display: none !important;
+}
+
 .gp-chancho .gp-hotspot__anillo {
 	position: relative;
 	width: 17px;
@@ -565,6 +535,7 @@
 	border-radius: 50%;
 	border: 2px solid #fff;
 	transition: transform 0.25s ease, box-shadow 0.25s ease;
+	pointer-events: none;
 }
 
 .gp-chancho .gp-hotspot__anillo::after {
@@ -593,21 +564,76 @@
 	outline: none;
 }
 
-.gp-chancho .gp-hotspot--vacio .gp-hotspot__anillo {
-	opacity: 0.5;
+.gp-chancho .gp-hotspot.is-activo .gp-hotspot__anillo {
+	animation: gp-pulso 1.5s ease-out infinite;
 }
 
+@keyframes gp-pulso {
+	0% {
+		box-shadow: 0 0 0 0 rgba(216, 184, 142, 0.6);
+	}
+	70% {
+		box-shadow: 0 0 0 12px rgba(216, 184, 142, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(216, 184, 142, 0);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.gp-chancho .gp-hotspot.is-activo .gp-hotspot__anillo {
+		animation: none;
+	}
+}
+
+/* Etiqueta flotante con el nombre del corte sobre el punto */
+.gp-chancho .gp-etiqueta {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 20;
+	transform: translate(-50%, calc(-100% - 10px));
+	background: #fff;
+	color: var(--gp-bordo);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 0.7rem;
+	font-weight: 700;
+	padding: 0.35rem 0.65rem;
+	border-radius: 4px;
+	white-space: nowrap;
+	pointer-events: none;
+	box-shadow: 0 8px 18px rgba(31, 12, 14, 0.3);
+	display: block;
+}
+
+.gp-chancho .gp-etiqueta::after {
+	content: "";
+	position: absolute;
+	bottom: -5px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 5px solid #fff;
+}
+
+.gp-chancho .gp-etiqueta[hidden] {
+	display: none !important;
+}
+
+/* Popover para diagrama en modo popup */
 .gp-chancho .gp-popover {
 	position: absolute;
 	top: 0;
 	left: 0;
-	z-index: 5;
+	z-index: 25;
 	transform: translate(-50%, calc(-100% - 14px));
 	background: #fff;
 	border-radius: 8px;
 	box-shadow: 0 16px 34px rgba(31, 12, 14, 0.35);
 	padding: 0.85rem 0.9rem;
-	min-width: 200px;
+	min-width: 220px;
 	white-space: normal;
 }
 
@@ -624,7 +650,6 @@
 	border-radius: 2px;
 }
 
-/* Si el punto está muy arriba, el globo se abre hacia abajo. */
 .gp-chancho .gp-popover--abajo {
 	transform: translate(-50%, 14px);
 }
@@ -635,7 +660,7 @@
 }
 
 .gp-chancho .gp-popover[hidden] {
-	display: none;
+	display: none !important;
 }
 
 .gp-chancho .gp-popover__titulo {
@@ -653,18 +678,18 @@
 	padding: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 0.3rem;
+	gap: 0.35rem;
 }
 
 .gp-chancho .gp-popover__lista button {
 	display: flex;
 	align-items: center;
-	gap: 0.6rem;
+	gap: 0.65rem;
 	width: 100%;
 	background: transparent !important;
 	border: none !important;
 	box-shadow: none !important;
-	padding: 0.3rem !important;
+	padding: 0.35rem 0.4rem !important;
 	margin: 0 !important;
 	border-radius: 6px !important;
 	cursor: pointer;
@@ -678,7 +703,7 @@
 
 .gp-chancho .gp-popover__lista button:hover,
 .gp-chancho .gp-popover__lista button:focus-visible {
-	background: rgba(131, 41, 49, 0.08) !important;
+	background: rgba(110, 34, 49, 0.08) !important;
 	color: var(--gp-tinta) !important;
 }
 
@@ -699,11 +724,282 @@
 	margin: 0;
 }
 
-/* ---------- Popup de producto ---------- */
+/* Lista de chips en mobile */
+.gp-chancho__lista {
+	display: none;
+	list-style: none;
+	margin: 1rem 0 0;
+	padding: 0;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	justify-content: center;
+}
+
+.gp-chancho .gp-parte-chip {
+	background: rgba(255, 255, 255, 0.12) !important;
+	border: 1px solid rgba(216, 184, 142, 0.4) !important;
+	box-shadow: none !important;
+	color: #fff !important;
+	border-radius: 999px !important;
+	padding: 0.55rem 0.9rem !important;
+	margin: 0 !important;
+	font-size: 0.8rem;
+	line-height: 1;
+	white-space: nowrap !important;
+	cursor: pointer;
+}
+
+.gp-chancho .gp-parte-chip[disabled] {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.gp-chancho .gp-parte-chip.is-activo {
+	background: var(--gp-arena) !important;
+	border-color: var(--gp-arena) !important;
+	color: var(--gp-bordo-oscuro) !important;
+}
+
+/* ---------- Adaptación Mobile del Diagrama (<= 900px) ---------- */
+@media (max-width: 900px) {
+	.gp-archivo--con-chancho {
+		grid-template-columns: 1fr;
+		gap: 0;
+		padding-bottom: 4.5rem;
+	}
+
+	.gp-archivo__chancho {
+		position: fixed;
+		top: auto;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 40;
+		padding: 0 0.6rem 0.6rem;
+		transform: translateY(105%);
+		transition: transform 0.3s ease;
+		pointer-events: none;
+	}
+
+	.gp-archivo__chancho.is-abierto {
+		transform: none;
+		pointer-events: auto;
+	}
+
+	.gp-archivo__chancho.is-abierto::before {
+		content: "";
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		background: rgba(31, 12, 14, 0.65);
+	}
+
+	.gp-archivo .gp-panel {
+		max-height: 80vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+		box-shadow: 0 -14px 40px rgba(0, 0, 0, 0.45);
+	}
+
+	.gp-archivo .gp-panel__cerrar {
+		display: block;
+	}
+
+	.gp-archivo .gp-chancho-fab.is-visible {
+		display: inline-flex;
+	}
+
+	.gp-chancho__lista {
+		display: flex;
+	}
+
+	.gp-chancho--filtro .gp-hotspot {
+		width: 34px !important;
+		height: 34px !important;
+		margin: -17px 0 0 -17px !important;
+	}
+
+	.gp-archivo .gp-panel__ayuda {
+		display: none;
+	}
+}
+
+/* Botón flotante móvil (FAB) */
+.gp-archivo .gp-chancho-fab {
+	display: none;
+	position: fixed;
+	right: 1rem;
+	bottom: 1rem;
+	z-index: 30;
+	align-items: center;
+	gap: 0.5rem;
+	background: var(--gp-bordo) !important;
+	color: #fff !important;
+	border: none !important;
+	border-radius: 999px !important;
+	padding: 0.85rem 1.2rem !important;
+	margin: 0 !important;
+	font-size: 0.78rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	box-shadow: 0 10px 24px rgba(31, 12, 14, 0.35) !important;
+	cursor: pointer;
+}
+
+.gp-archivo .gp-icon-chancho {
+	width: 20px !important;
+	height: 20px !important;
+	flex: none;
+}
+
+/* ---------- Sección Inferior: "¿Conocés las partes del cerdo?" ---------- */
+.gp-seccion-partes {
+	background: var(--gp-bordo-oscuro);
+	position: relative;
+	width: 100vw;
+	left: 50%;
+	right: 50%;
+	margin-left: -50vw;
+	margin-right: -50vw;
+	box-sizing: border-box;
+	max-width: 100vw;
+	padding: 4.5rem 1.5rem;
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+	color: #fff;
+}
+
+.gp-seccion-partes__container {
+	max-width: 1140px;
+	margin: 0 auto;
+	display: grid;
+	grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+	align-items: center;
+	gap: 3rem;
+	box-sizing: border-box;
+}
+
+.gp-seccion-partes__titulo {
+	color: var(--gp-arena) !important;
+	font-size: clamp(1.8rem, 3.2vw, 2.5rem) !important;
+	font-weight: 700 !important;
+	line-height: 1.18 !important;
+	margin: 0 0 1.25rem !important;
+}
+
+.gp-seccion-partes__descripcion {
+	color: rgba(255, 255, 255, 0.88) !important;
+	font-size: 0.98rem !important;
+	line-height: 1.6 !important;
+	max-width: 340px !important;
+	margin: 0 0 1.75rem !important;
+}
+
+.gp-seccion-partes__linea {
+	width: 70px;
+	height: 2px;
+	background: var(--gp-arena);
+	margin: 0;
+}
+
+@media (max-width: 900px) {
+	.gp-seccion-partes {
+		padding: 3.5rem 1.25rem;
+	}
+
+	.gp-seccion-partes__container {
+		grid-template-columns: 1fr;
+		gap: 2.5rem;
+		text-align: center;
+	}
+
+	.gp-seccion-partes__descripcion {
+		max-width: 100% !important;
+	}
+
+	.gp-seccion-partes__linea {
+		margin: 0 auto;
+	}
+}
+
+/* ---------- Corrección del espacio en blanco superior e inferior de Elementor (.e-con.e-flex > .e-con-inner) ---------- */
+body.gp-pagina-archivo .site-main,
+body.gp-pagina-archivo .page-content,
+body.gp-pagina-archivo .elementor[data-elementor-type="wp-page"],
+body.gp-pagina-archivo .elementor[data-elementor-type="archive"],
+body.gp-pagina-archivo .elementor-location-single,
+body:has(.gp-catalogo-wrap) .site-main,
+body:has(.gp-catalogo-wrap) .page-content,
+body:has(.gp-catalogo-wrap) .elementor[data-elementor-type="wp-page"],
+body:has(.gp-catalogo-wrap) .elementor[data-elementor-type="archive"],
+body:has(.gp-catalogo-wrap) .elementor-location-single {
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+body.gp-pagina-archivo:has(.gp-hero) .page-header,
+body:has(.gp-hero) .page-header {
+	display: none !important;
+}
+
+body.gp-pagina-archivo .e-con.e-flex.gp-e-con-limpio,
+body.gp-pagina-archivo .e-con.e-flex.gp-e-con-limpio > .e-con-inner,
+.gp-e-con-limpio,
+.gp-e-con-limpio > .e-con-inner,
+.e-con.e-flex:has(.gp-hero),
+.e-con.e-flex:has(.gp-catalogo-wrap),
+.e-con.e-flex:has(.gp-seccion-partes),
+.e-con.e-flex:has(.gp-hero) > .e-con-inner,
+.e-con.e-flex:has(.gp-catalogo-wrap) > .e-con-inner,
+.e-con.e-flex:has(.gp-seccion-partes) > .e-con-inner,
+body.gp-pagina-archivo .e-con.e-flex:has(.gp-catalogo-wrap),
+body.gp-pagina-archivo .e-con.e-flex:has(.gp-catalogo-wrap) > .e-con-inner {
+	padding: 0 !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+	padding-block-start: 0 !important;
+	padding-block-end: 0 !important;
+	padding-inline-start: 0 !important;
+	padding-inline-end: 0 !important;
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+	margin-block-start: 0 !important;
+	margin-block-end: 0 !important;
+	row-gap: 0 !important;
+	gap: 0 !important;
+	min-height: 0 !important;
+	--padding-top: 0px;
+	--padding-bottom: 0px;
+	--padding-left: 0px;
+	--padding-right: 0px;
+	--padding-block-start: 0px;
+	--padding-block-end: 0px;
+	--padding-inline-start: 0px;
+	--padding-inline-end: 0px;
+	--gap: 0px;
+	--row-gap: 0px;
+}
+
+.elementor-widget.gp-e-con-limpio,
+.elementor-widget.gp-e-con-limpio > .elementor-widget-container,
+.elementor-widget.gp-e-con-limpio .elementor-shortcode,
+.elementor-widget:has(.gp-hero),
+.elementor-widget:has(.gp-catalogo-wrap),
+.elementor-widget:has(.gp-seccion-partes),
+.elementor-widget:has(.gp-hero) > .elementor-widget-container,
+.elementor-widget:has(.gp-catalogo-wrap) > .elementor-widget-container,
+.elementor-widget:has(.gp-seccion-partes) > .elementor-widget-container,
+.elementor-widget:has(.gp-catalogo-wrap) .elementor-shortcode {
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+/* ---------- Popup / Modal de Producto ---------- */
 .gp-modal {
 	position: fixed;
 	inset: 0;
-	z-index: 9999;
+	z-index: 99999;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -711,7 +1007,7 @@
 }
 
 .gp-modal[hidden] {
-	display: none;
+	display: none !important;
 }
 
 .gp-modal .gp-modal__overlay {
@@ -735,8 +1031,8 @@
 
 .gp-modal .gp-modal__cerrar {
 	position: absolute;
-	top: 0.35rem;
-	right: 0.7rem;
+	top: 0.5rem;
+	right: 0.8rem;
 	background: transparent !important;
 	border: none !important;
 	box-shadow: none !important;
@@ -746,7 +1042,7 @@
 	line-height: 1;
 	cursor: pointer;
 	color: rgba(255, 255, 255, 0.8) !important;
-	z-index: 3;
+	z-index: 10;
 	transition: color 0.2s ease;
 }
 
@@ -755,20 +1051,13 @@
 	background: transparent !important;
 }
 
-/* Aire para que la X no se le encime al texto. */
-.gp-modal .gp-detalle {
-	padding-right: 3rem;
-}
-
-/* ---------- Ficha del producto (popup, single y embebida) ---------- */
-/* Sigue la hoja del catálogo: foto con marco blanco, nombre en itálica,
-   etiqueta "Presentación" finita y el dato en negrita. */
+/* ---------- Ficha del Producto (.gp-detalle) ---------- */
 .gp-detalle {
 	display: grid;
-	grid-template-columns: 0.85fr 1.15fr;
-	gap: 2rem;
+	grid-template-columns: 0.88fr 1.12fr;
+	gap: 2.2rem;
 	align-items: center;
-	padding: 2.3rem 2.4rem;
+	padding: 2.4rem 2.5rem;
 	color: #fff;
 }
 
@@ -776,6 +1065,7 @@
 	background: #fff;
 	padding: 0.6rem;
 	box-shadow: 0 12px 26px rgba(0, 0, 0, 0.3);
+	border-radius: 4px;
 }
 
 .gp-detalle .gp-detalle__media img {
@@ -793,16 +1083,17 @@
 	color: var(--gp-arena);
 	text-transform: uppercase;
 	letter-spacing: 0.14em;
-	font-size: 0.7rem;
-	margin: 0 0 0.6rem;
+	font-size: 0.72rem;
+	font-weight: 600;
+	margin: 0 0 0.5rem;
 }
 
 .gp-detalle .gp-detalle__titulo {
-	color: #fff;
-	font-style: italic;
-	font-size: 1.7rem;
-	line-height: 1.2;
-	margin: 0 0 1.1rem;
+	color: #fff !important;
+	font-style: italic !important;
+	font-size: 1.75rem !important;
+	line-height: 1.2 !important;
+	margin: 0 0 1rem !important;
 }
 
 .gp-detalle .gp-detalle__etiqueta {
@@ -816,12 +1107,12 @@
 .gp-detalle .gp-detalle__presentacion {
 	color: #fff;
 	font-weight: 700;
-	font-size: 0.95rem;
+	font-size: 0.98rem;
 	margin: 0 0 1.25rem;
 }
 
 .gp-detalle .gp-detalle__tips {
-	border-top: 1px solid rgba(216, 184, 142, 0.35);
+	border-top: 1px solid rgba(216, 184, 142, 0.4);
 	padding-top: 0.9rem;
 	margin: 0 0 1.4rem;
 }
@@ -830,44 +1121,18 @@
 	color: var(--gp-arena);
 	text-transform: uppercase;
 	letter-spacing: 0.1em;
-	font-size: 0.7rem;
+	font-size: 0.72rem;
+	font-weight: 600;
 	margin-bottom: 0.3rem;
 }
 
 .gp-detalle .gp-detalle__tips p {
 	margin: 0;
 	font-size: 0.92rem;
-	color: rgba(255, 255, 255, 0.9);
+	line-height: 1.5;
+	color: rgba(255, 255, 255, 0.92);
 }
 
-@media (max-width: 640px) {
-	.gp-detalle {
-		grid-template-columns: 1fr;
-		padding: 1.5rem;
-		gap: 1.25rem;
-	}
-
-	.gp-detalle .gp-detalle__titulo {
-		font-size: 1.4rem;
-	}
-}
-
-/* Single directo: la ficha va sobre el bloque bordó, como en el catálogo. */
-.gp-single__contenedor {
-	max-width: 880px;
-	margin: 3rem auto;
-	background: var(--gp-bordo-oscuro);
-	border-radius: 6px;
-	overflow: hidden;
-}
-
-.gp-producto-embebido {
-	background: var(--gp-bordo-oscuro);
-	border-radius: 6px;
-	overflow: hidden;
-}
-
-/* ---------- CTA WhatsApp (botón del home: rectangular, mayúsculas) ---------- */
 .gp-detalle .gp-cta-whatsapp {
 	display: inline-flex;
 	align-self: flex-start;
@@ -880,7 +1145,7 @@
 	text-transform: uppercase;
 	letter-spacing: 0.07em;
 	font-size: 0.76rem;
-	font-weight: 600;
+	font-weight: 700;
 	line-height: 1;
 	padding: 1.05em 1.5em !important;
 	border-radius: 0 !important;
@@ -903,7 +1168,18 @@ body.gp-modal-abierto {
 	overflow: hidden;
 }
 
-/* En pantallas chicas el CTA se achica lo justo para no partirse en dos. */
+@media (max-width: 640px) {
+	.gp-detalle {
+		grid-template-columns: 1fr;
+		padding: 1.6rem 1.5rem;
+		gap: 1.25rem;
+	}
+
+	.gp-detalle .gp-detalle__titulo {
+		font-size: 1.4rem !important;
+	}
+}
+
 @media (max-width: 480px) {
 	.gp-detalle .gp-cta-whatsapp {
 		font-size: 0.72rem;
@@ -912,7 +1188,17 @@ body.gp-modal-abierto {
 	}
 }
 
-/* ---------- Aviso para el administrador ---------- */
+/* Single directo y producto embebido */
+.gp-single__contenedor,
+.gp-producto-embebido {
+	max-width: 880px;
+	margin: 3rem auto;
+	background: var(--gp-bordo-oscuro);
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+/* Aviso para el administrador */
 .gp-aviso {
 	background: #fff7e6;
 	border-left: 4px solid var(--gp-bordo);
