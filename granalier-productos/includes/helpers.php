@@ -183,11 +183,11 @@ function gp_aviso_admin( $mensaje, $url = '', $texto_enlace = '' ) {
 }
 
 /**
- * Ícono minimalista y bien proporcionado para el botón flotante del archivo en mobile.
- * ViewBox 24x24 cuadrado y trazo limpio sin deformación.
+ * Ícono limpio e inconfundible de cabeza de cerdo para el botón flotante en mobile.
+ * ViewBox 24x24 cuadrado, proporciones verificadas con fill-rule evenodd.
  */
 function gp_chancho_icon() {
-	return '<svg class="gp-icon-chancho" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path d="M21.7 10.3c-.2-.6-.7-1.1-1.3-1.3-.2-.7-.6-1.3-1.1-1.8l.8-1.5c.2-.3.1-.7-.2-.9-.3-.2-.7-.1-.9.2l-.9 1.6c-1-.5-2.2-.8-3.5-.8-3.5 0-6.7 1.8-8.1 4.5-.7.1-1.3.4-1.7.9-.6.7-.7 1.7-.3 2.5.3.6.8 1.1 1.4 1.3.2 1.8 1.4 3.4 3.2 4.1v1.6c0 .4.3.8.8.8h1.8c.4 0 .8-.4.8-.8v-1.1h3.4v1.1c0 .4.3.8.8.8h1.8c.4 0 .8-.4.8-.8v-1.8c2-1.2 3.2-3.3 3.2-5.6 0-.8-.2-1.6-.7-2.3.1-.4.1-.7 0-1.1zM17.5 9.5c.6 0 1 .4 1 1s-.4 1-1 1-1-.4-1-1 .4-1 1-1z"/></svg>';
+	return '<svg class="gp-icon-chancho" viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.2 6C10.6 5.2 13.4 5.2 15.8 6C17.4 3.4 20.2 3.2 21 4.6C21.8 6 21 8.2 20.3 9.4C21.2 10.9 21.6 12.4 21.6 13.8C21.6 18.2 17.4 21.2 12 21.2C6.6 21.2 2.4 18.2 2.4 13.8C2.4 12.4 2.8 10.9 3.7 9.4C3 8.2 2.2 6 3 4.6C3.8 3.2 6.6 3.4 8.2 6ZM8.2 9.45A1.15 1.15 0 1 0 8.2 11.75A1.15 1.15 0 1 0 8.2 9.45ZM15.8 9.45A1.15 1.15 0 1 0 15.8 11.75A1.15 1.15 0 1 0 15.8 9.45ZM12 12.2A4.7 3.2 0 1 0 12 18.6A4.7 3.2 0 1 0 12 12.2ZM12 13.45A3.4 1.95 0 1 0 12 17.35A3.4 1.95 0 1 0 12 13.45ZM10.6 14.6A0.8 0.8 0 1 0 10.6 16.2A0.8 0.8 0 1 0 10.6 14.6ZM13.4 14.6A0.8 0.8 0 1 0 13.4 16.2A0.8 0.8 0 1 0 13.4 14.6Z"/></svg>';
 }
 
 function gp_whatsapp_icon() {

@@ -848,9 +848,16 @@ body:has(.gp-catalogo-wrap) .site-header > .header-inner {
 }
 
 .gp-archivo .gp-icon-chancho {
-	width: 20px !important;
-	height: 20px !important;
-	flex: none;
+	display: block !important;
+	width: 22px !important;
+	height: 22px !important;
+	min-width: 22px !important;
+	min-height: 22px !important;
+	max-width: none !important;
+	flex: none !important;
+	color: #fff !important;
+	fill: currentColor !important;
+	overflow: visible !important;
 }
 
 /* ---------- Sección Inferior: "¿Conocés las partes del cerdo?" ---------- */
